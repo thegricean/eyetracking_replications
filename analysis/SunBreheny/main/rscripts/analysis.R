@@ -26,113 +26,8 @@ df = df %>%
 
 df = separate(df,response,into=c("click1","click2","click3","click4"),sep=",")
 
-# plot proportion of selections by condition
-toplot =  df %>%
-  filter(ExpFiller=="Exp") %>%
-  select(workerid,condition,size,click1,click2,click3,click4,target1,target2,competitor1,competitor2,instruction3) %>%
-  mutate(ID = row_number()) %>%
-  gather(click_number,location,click1:click4) %>%
-  mutate(target=ifelse(location==target1,1,ifelse(location==target2,1,0))) %>%
-  mutate(competitor=ifelse(location==competitor1,1,ifelse(location==competitor2,1,0))) %>%
-  group_by(condition,size,click_number) %>%
-  summarize(m_target=mean(target),m_competitor=mean(competitor),ci_low_target=ci.low(target),ci_high_target=ci.high(target),ci_low_competitor=ci.low(competitor),ci_high_competitor=ci.high(competitor)) %>%
-  gather(location,Mean,m_target:m_competitor) %>%
-  mutate(CILow=ifelse(location=="m_target",ci_low_target,ifelse(location=="m_competitor",ci_low_competitor,0))) %>%
-  mutate(CIHigh=ifelse(location=="m_target",ci_high_target,ifelse(location=="m_competitor",ci_high_competitor,0))) %>%
-  mutate(YMin=Mean-CILow,YMax=Mean+CIHigh) %>%
-  mutate(Region=fct_recode(location,"competitor"="m_competitor","target"="m_target")) %>%
-  mutate(Region=fct_rev(Region)) %>%
-  ungroup() %>%
-  mutate(click_number=fct_recode(click_number,prior="click1",gender="click2",determiner="click3",noun="click4"))
-
-proportions = ggplot(toplot, aes(x=click_number, y=Mean, group=Region)) +
-  geom_line(aes(color=Region),size=1.3) +
-  geom_point(aes(color=Region),size=2.5,shape="square") +
-  geom_errorbar(aes(ymin=YMin, ymax=YMax), width=.2, alpha=.3) +
-  facet_grid(size ~condition ) + 
-  scale_color_manual(values=c("darkgreen","orange")) +
-  xlab("Window") +
-  ylab("Proportion of selections") +
-  theme(axis.text.x=element_text(angle=30,hjust=1,vjust=1))
-
-proportions
-
-ggsave(proportions, file="../graphs/proportions.pdf",width=9,height=4.5)
-
-# plot proportion of selections by condition and experiment half
-toplot =  df %>%
-  filter(ExpFiller=="Exp") %>%
-  select(workerid,condition,size,click1,click2,click3,click4,target1,target2,competitor1,competitor2,instruction3,trial_group) %>%
-  mutate(ID = row_number()) %>%
-  gather(click_number,location,click1:click4) %>%
-  mutate(target=ifelse(location==target1,1,ifelse(location==target2,1,0))) %>%
-  mutate(competitor=ifelse(location==competitor1,1,ifelse(location==competitor2,1,0))) %>%
-  group_by(condition,size,click_number,trial_group) %>%
-  summarize(m_target=mean(target),m_competitor=mean(competitor),ci_low_target=ci.low(target),ci_high_target=ci.high(target),ci_low_competitor=ci.low(competitor),ci_high_competitor=ci.high(competitor)) %>%
-  gather(location,Mean,m_target:m_competitor) %>%
-  mutate(CILow=ifelse(location=="m_target",ci_low_target,ifelse(location=="m_competitor",ci_low_competitor,0))) %>%
-  mutate(CIHigh=ifelse(location=="m_target",ci_high_target,ifelse(location=="m_competitor",ci_high_competitor,0))) %>%
-  mutate(YMin=Mean-CILow,YMax=Mean+CIHigh) %>%
-  mutate(Region=fct_recode(location,"competitor"="m_competitor","target"="m_target")) %>%
-  mutate(Region=fct_rev(Region)) %>%
-  ungroup() %>%
-  mutate(click_number=fct_recode(click_number,prior="click1",gender="click2",determiner="click3",noun="click4"))
-
-proportions = ggplot(toplot, aes(x=click_number, y=Mean, group=Region)) +
-  geom_line(aes(color=Region),size=1.3) +
-  geom_point(aes(color=Region),size=2.5,shape="square") +
-  geom_errorbar(aes(ymin=YMin, ymax=YMax), width=.2, alpha=.3) +
-  facet_grid(trial_group + size ~condition ) + 
-  scale_color_manual(values=c("darkgreen","orange")) +
-  xlab("Window") +
-  ylab("Proportion of selections") +
-  theme(axis.text.x=element_text(angle=30,hjust=1,vjust=1))
-
-proportions
-
-ggsave(proportions, file="../graphs/proportions_order.pdf",width=9,height=9)
-
-
-# recreate Fig 13 from Sun & Breheny 2020
-# compute and then plot target preference scores in each window
-toplot =  df %>%
-  filter(ExpFiller=="Exp") %>%
-  select(workerid,condition,size,click1,click2,click3,click4,target1,target2,competitor1,competitor2,instruction3) %>%
-  mutate(ID = row_number()) %>%
-  gather(click_number,location,click1:click4) %>%
-  mutate(target=ifelse(location==target1,1,ifelse(location==target2,1,0))) %>%
-  mutate(competitor=ifelse(location==competitor1,1,ifelse(location==competitor2,1,0))) %>%
-  # when target == 0 and comp == 0, turn target 0 into .5? or exclude? excluding for time being (leads to exclusion of 3230 data points)
-  filter(target == 1 | competitor == 1) %>% 
-  group_by(condition,size,click_number,workerid) %>%
-  summarize(m_target=mean(target),m_competitor=mean(competitor)+.00000001) %>% 
-  ungroup() %>% 
-  mutate(prop=(m_target/m_competitor)+.00000001,targetadvantage=log(prop)) %>% 
-  group_by(condition,size,click_number) %>%
-  summarize(target=mean(targetadvantage),ci_low_target=ci.low(targetadvantage),ci_high_target=ci.high(targetadvantage)) %>%
-  ungroup() %>% 
-  mutate(YMin=target-ci_low_target,YMax=target+ci_high_target) %>% 
-  mutate(Condition=fct_relevel(condition,"all","some"),Size=size) %>%
-  mutate(Condition=fct_recode(Condition,"number"="num"))
-dodge=position_dodge(0)
-
-ggplot(toplot, aes(x=click_number, y=target, color=Condition, linetype=Size,group=interaction(Condition,Size))) +
-  geom_line(size=1.3,position=dodge) +
-  geom_point(size=2.5,shape="square",position=dodge) +
-  geom_errorbar(aes(ymin=YMin, ymax=YMax), width=.2, alpha=.7,  linetype="solid",position=dodge) +
-  # facet_grid(size ~condition ) + 
-  scale_color_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
-  scale_x_discrete(breaks=c("click1","click2","click3","click4"),
-                   labels=c("Baseline", "Gender", "Determiner", "Noun")) +
-  xlab("Window") +
-  ylab("log(P(Target)/P(Competitor))") #+
-  # theme(axis.text.x=element_text(angle=30,hjust=1,vjust=1))
-ggsave("../graphs/results-idt.pdf",width=4.5,height=2.5)
-
-
-
 # run 2 models: 
-# 1. like Sun & Breheny, fit linear models individually to each time window: "We constructed separate linear mixed- effects models for each time window predicting target preference scores from fixed effects of Determiner (all, some or number), Target size (small or big), Time and their interactions, including maximal random effects structure supported by the data."
+# 1. like Sun & Breheny, fit linear models individually to each time window: "We constructed separate linear mixed- effects models for each time window predicting target preference scores from fixed effects of Determiner (all, some or number), Target size (small or big), Time and their interactions, including maximal random effects structure supported by the data." -- TODO
 # 2. do the more principled mixed effects logistic regression on each window
 
 # get just experimental trials and wrangle data
@@ -191,9 +86,6 @@ dc_noun = cbind(d_noun,myCenter(d_noun[,c("size","condition")]))
 m.noun = glmer(target ~ condition*csize + (1+condition+size|workerid) + (1|item),family="binomial",data=dc_noun)
 summary(m.noun)
 
-
-
-
-
-m.simple = glmer(target ~ condition*size-size + (1|workerid),family="binomial",data=ddet)
-summary(m.simple)
+# simple effects analysis to probe interaction in determiner window
+m_determiner.simple = glmer(target ~ condition*size-size + (1+condition+size|workerid) + (1|item),family="binomial",data=dc_determiner)
+summary(m_determiner.simple)

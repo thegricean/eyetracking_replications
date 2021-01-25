@@ -77,13 +77,19 @@
 \jd{write}
 
 \textbf{Keywords:} 
-psycholinguistics; experimental pragmatics;  scalar implicature; linking functions; eye-tracking
+psycholinguistics; experimental pragmatics;  scalar implicature; linking functions; visual world; eye-tracking
 \end{abstract}
 
 
 \section{Introduction}
 
 \jd{include general linking function refs (see qing et al refs and also newer stuff by jim magnuson)}
+\begin{itemize}
+	\item VWP \cite<VWP,>{tanenhaus1995,SedivyEtAl1999:Achieving-Incremental-Semantic-, LeffelXiangKennedy2016:Imprecision-is-Pragmatic-} \jd{others like sun and breheny, kurumada, ryskin, degen, many others?} 
+	\item linking functions eye-tracking: \citeNP{SalverdaTanenhaus2017:The-Visual-World-Paradigm, tanenhaus2000eye, AllopennaEtAl1998:Tracking-the-Time-} -- allopenna et al used gating task; mention
+	\item linking functions in xprag (especially tvjt): \cite{Jasbi2019, WaldonDegen2020, franke2014typical, savinelli2018, franke2016link, scholler2017semantic, tessler2019language}
+	\item incremental decision task: \cite{AllopennaEtAl1998:Tracking-the-Time-,QingLD2018, KreissDegen2020}
+\end{itemize}
 
 \jd{include linking function for xprag refs: qing et al, jasbi et al, franke 2014 and franke newer paper (see our scil paper), scontras, waldon and degen}
 
@@ -122,20 +128,44 @@ We replicate \expref{3} of \citeA{sun2020}.
 
 \subsection{Results}
 
-The results of a mixed-effects logistic regression in the determiner window, predicting target over competitor choices from fixed effects of quantifier (reference level: ``number"), centered size (higher value: ``big"), and by-item and by-subject random intercepts, and random by-subject slopes from condition and size. There were main effects of condition, such that target selections were less likely in both the \emph{some} ($\beta$=-2.90, $SE$=0.36, $p<$.0001) and \emph{all} ($\beta$=-2.92, $SE$=0.36, $p<$.0001) conditions, compared to the number condition. There was no main effect of size, consistent with the visual result that target selections in the number condition are not modulated by  target set size ($\beta$=-0.09, $SE$=0.26, $p<$.73). However, we did observe interactions between quantifier and size, such that small sets led to more target selections for \emph{some} ($\beta$=0.59, $SE$=0.28, $p<$.05) but to fewer target selections for \emph{all} ($\beta$=-1.27, $SE$=0.29, $p<$.0001), compared to number terms. \jd{does this replicate SB results? also report target preference score analysis?}
+\figref{fig:results-idt} shows target advantage scores for each time window, analogous to \figref{fig:results-original} from \citeA{sun2020}.
+
+\textbf{Data analysis}. \citeA{sun2020} fit separate regression models to the baseline, gender, determiner, name, and noun windows. We collapsed the name window into the determiner window because the name does not add information. We thus fit mixed-effects logistic regression models to the baseline, gender, determiner, and noun window,\footnote{In fact, fitting models to the noun window was impossible because participants, with very few exceptions, always chose the target. That is, there was no variance to speak of that a model could be estimated to explain.} predicting target over competitor choices from fixed effects of quantifier (reference level: ``number"), centered size (higher value: ``big"), by-item and by-subject random intercepts, and random by-subject slopes for condition and size. No effects reached significance in the baseline, gender, and noun window, as expected. In the determiner window, the window of interest, there were main effects of condition, such that target selections were less likely in both the \emph{some} ($\beta$=-2.90, $SE$=0.36, $p<$.0001) and \emph{all} ($\beta$=-2.92, $SE$=0.36, $p<$.0001) conditions, compared to the number condition. There was no main effect of size, consistent with the visual result that target selections in the number condition are not modulated by  target set size ($\beta$=-0.09, $SE$=0.26, $p<$.73). However, we did observe interactions between quantifier and size, such that small sets led to more target selections for \emph{some} ($\beta$=0.59, $SE$=0.28, $p<$.05) but to fewer target selections for \emph{all} ($\beta$=-1.27, $SE$=0.29, $p<$.0001), compared to number terms. \jd{also report target preference score analysis?}
 
 %(Intercept)          3.77254    0.39655   9.513  < 2e-16 ***
-%conditionall        -2.92409    0.36359  -8.042 8.81e-16 ***
-%conditionsome       -2.90211    0.36217  -8.013 1.12e-15 ***
-%csize               -0.09207    0.26069  -0.353   0.7239    
-%conditionall:csize  -1.27305    0.28523  -4.463 8.08e-06 ***
-%conditionsome:csize  0.59465    0.27945   2.128   0.0333 *  
+%conditionall        -2.92409    0.36359  -8.042 8.81e-16 *** 		replicates
+%conditionsome       -2.90211    0.36217  -8.013 1.12e-15 ***		replicates
+%csize               -0.09207    0.26069  -0.353   0.7239    			does not replicate -- they found main effect (more looks to big set and steeper increase)
+%conditionall:csize  -1.27305    0.28523  -4.463 8.08e-06 ***		replicates
+%conditionsome:csize  0.59465    0.27945   2.128   0.0333 *  		does not replicate , they found null effect (but perhaps in name window? they don't report this specifically)
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\columnwidth]{../../analysis/SunBreheny/main/graphs/results-idt}
 \caption{Proportions of target and competitor selections in Exp.~2 by quantifier and set size.} 
 \label{fig:results-idt}
+\end{figure}
+
+\textbf{Comparison with \citeA{sun2020}: replication analysis}. These results constitute a partial replication of  \citeA{sun2020}, though we will argue that in in fact constitutes a near-exact replication. Most of their effects reported in the determiner window replicated, with two exceptions: we did not observe a main effect of set size, while they did; and we observed an interaction of size and determiner such that small \emph{some} led to greater target selections than big \emph{some}. These differences are not as big as they may seem: in our dataset, the lack of set size main effect can be explained by the interactions with determiner: while size makes no difference at all for number (the determiner predictor reference level), it has the opposite effect for \emph{all} compared to \emph{some}. A similar tendency can be observed in  \citeA{sun2020}'s results when taking into account the joint determiner and name windows. In fact,  \citeA{sun2020} report the absence of a main effect for size in the name window, and instead an interaction between size and determiner. While they do not report the same post hoc analyses, visual inspection of \figref{fig:results-original} suggests that the interaction in the name window is indeed the result of set size having the opposite effect for \emph{all} compared to \emph{some}. Thus, when taking into account their results from both the determiner and name window, which we collapsed into one, the results are qualitatively identical. The different results reported by  \citeA{sun2020} in the two time windows are presumably the result of certain information taking longer to be integrated, something which the incremental decision task by its offline nature cannot capture.
+
+\textbf{Comparison with \citeA{sun2020}: linking function analysis}. The overall correlation between proportion of selections and proportions of looks, where proportions were calculated separately by region of interest (target, competitor, distractors), time window (baseline, gender, determiner$+$name, noun), determiner (\emph{all, some}, number), and set size (big, small), was high ($r(70) = .69$). At the individual
+
+%Correlation between proportion of target selections in determiner window and target looks in determiner\+name window: Pearson's $r=.99$. Competitor: $r=.86$. Distractors: $r=.93$.
+
+\jd{CONTINUE HERE DESCRIBING LINKING FUNCTION RESULTS}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\columnwidth]{../../analysis/SunBreheny/main/graphs/correlations}
+\caption{Proportions of looks in \citeA{sun2020} against proportions of selections in \expref{1}. Facets indicate regions, colors indicate time window.} 
+\label{fig:results-correlations}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\columnwidth]{../../analysis/SunBreheny/main/graphs/correlations-bycondition}
+\caption{Proportions of looks in \citeA{sun2020} against proportions of selections in \expref{1}. Facets indicate regions, colors indicate time window.} 
+\label{fig:results-correlations}
 \end{figure}
 
 \section{General discussion}
