@@ -17,6 +17,9 @@ library(lme4)
 library(ggplot2)
 library("readxl")
 
+# this.dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+# setwd(this.dir)
+
 # load helper scripts
 source("helpers.R")
 
@@ -101,11 +104,12 @@ ggplot(participants, aes(x=language)) +
 Separate time and x/y coordinates into separate data points, one per row, and define regions of interest (ROIs).
 ```{r,message=F,warning=F}
 # set width and height of ROIs
-imgwidth = 107 + 110 # boy/girl + objects
-imgheight = 200 # boy/girl (taller than objects)
+padding = 20
+imgwidth = 107 + 110 + padding # boy/girl + objects
+imgheight = 200 + padding # boy/girl (taller than objects)
 
-center_imgwidth = 220 # objects
-center_imgheight = 110 # objects
+center_imgwidth = 220 + padding # objects
+center_imgheight = 110 + padding # objects
 
 scene_width = 1280 # everything takes place in a central 'scene' of  1280 x 750 pixels 
 scene_height = 750 
@@ -149,11 +153,11 @@ dd = d %>%
                          look=="center" ~ "center",
                          TRUE ~ "other")) %>%
   mutate(target_look = ifelse(ROI == "target", 1, 0), competitor_look = ifelse(ROI == "competitor", 1, 0), center_look = ifelse(ROI == "center", 1, 0), other_look = ifelse(ROI == "other", 1, 0)) %>%
-  filter(look!="other") #TODO: remove other looks outside window?
+  filter(x > -2000 & x < 3000 & y > -2000 & y < 2000)#look!="other") #TODO: remove other looks outside window?
 
 # sanity check that ROIs are getting correctly assigned
 ggplot(dd, aes(x=x,y=y,color=look)) +
-  geom_point() +
+  geom_point(size=.5,alpha=.4) +
   facet_wrap(~workerid,scales="free")
 ```
 
