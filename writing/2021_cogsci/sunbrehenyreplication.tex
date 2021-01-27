@@ -57,14 +57,17 @@
 \definecolor{Red}{RGB}{180,20,140}
 \newcommand{\jd}[1]{\textcolor{Red}{\textbf{[jd: #1]}}} 
 
-\title{Replicating eye-tracking research using incremental decision tasks and web-based libraries} 
+\title{Seeing is believing: testing an explicit linking assumption for visual world eye-tracking in psycholinguistics} 
  
 \author{{\large \bf Judith Degen (jdegen@stanford.edu)} \\
-  Department of Psychology, 1202 W. Johnson Street \\
-  Madison, WI 53706 USA
+  Department of Linguistics, 450 Jane Stanford Way \\
+  Stanford, CA 94305 USA
   \AND {\large \bf Leyla Kursat (lkursat@stanford.edu)} \\
-  Department of Educational Psychology, 1025 W. Johnson Street \\
-  Madison, WI 53706 USA}
+  Department of Linguistics, 450 Jane Stanford Way \\
+  Stanford, CA 94305 USA
+  \AND {\large \bf Daisy Leight (ddleigh@stanford.edu)} \\
+  Department of Linguistics, 450 Jane Stanford Way \\
+  Stanford, CA 94305 USA}
 
 
 \begin{document}
@@ -83,7 +86,7 @@ psycholinguistics; experimental pragmatics;  scalar implicature; linking functio
 
 \section{Introduction}
 
-A key method of scientific investigation in cognitive science is experimental investigation. Experimental data has informed cognitive theory-building for centuries. A key ingredient for using data to test hypotheses generated from theories is the assumption one makes as a researcher about how theoretical notions map onto empirical measurements: the \emph{linking assumption}. Indeed, empirical measurement, and the data resulting from it, are only useful and informative if the assumed linking assumption is (sufficiently) clear and justified. We argue that both clarity and justification are currently lacking for linking assumptions made for \emph{visual world eye-tracking}, a widely used experimental method in psycholinguistic research. We highlight the role that visual world eye-tracking has played in the burgeoning field of experimental pragmatics, which suffers particularly acutely from a lack of clear and justified linking assumptions. We then test an often implicitly assumed linking assumption in referential tasks: that \emph{the proportion of looks to a referent in a time window reflects participants' degree of belief that the referent is the intended target in that time window}. To do so, we compare eye movement data against explicit beliefs collected in an incremental decision task. We make use of a previously collected eye movement dataset on scalar implicature processing \cite<\expref{3}>{sun2020}, \jd{which we also replicate in a web-based eye-tracking paradigm using \texttt{webgazer.js}  (\expref{1})}. We collect explicit beliefs to test against the original and replicated eye movement data in \expref{2}. 
+Experimental investigation of phenomena is a key method of scientific investigation in cognitive science, and experimental data has informed cognitive theory-building for centuries. A key ingredient for using empirical data to put theories to the test is the assumption made by researchers about how the mapping between theoretical notions and empirical measurements: the \emph{linking assumption}. Indeed, empirical measurement, and the data resulting from it, are only useful and informative if the assumed linking assumption is (sufficiently) clear and justified. We argue that both clarity and justification are currently lacking for linking assumptions made for \emph{visual world eye-tracking}, a widely used experimental method in psycholinguistic research. We highlight the role that visual world eye-tracking has played in the burgeoning field of experimental pragmatics, which suffers particularly acutely from a lack of clear and justified linking assumptions. We then test a (usually implicitly) assumed linking assumption for referential tasks: that \emph{the proportion of looks to a referent in a time window reflects participants' degree of belief that the referent is the intended target in that time window}. To do so, we compare eye movement data against explicit beliefs collected in an incremental decision task. We make use of a previously collected eye movement dataset on scalar implicature processing \cite<\expref{3}>{sun2020}, \jd{which we also replicate in a web-based eye-tracking paradigm using \texttt{webgazer.js}  (\expref{1})}. We collect explicit beliefs to test against the original and replicated eye movement data in \expref{2}. 
 
 \section{Linking assumptions for visual world eye-tracking}
 
@@ -92,14 +95,14 @@ A key method of scientific investigation in cognitive science is experimental in
 	\item linking functions eye-tracking: \citeNP{SalverdaTanenhaus2017:The-Visual-World-Paradigm, tanenhaus2000eye, AllopennaEtAl1998:Tracking-the-Time-,magnuson2019fixations} -- allopenna et al used gating task; mention
 	\item linking functions in xprag (especially tvjt): \cite{Jasbi2019, WaldonDegen2020, franke2014typical, savinelli2018, franke2016link, scholler2017semantic, tessler2019language}
 	\item incremental decision task: \cite{AllopennaEtAl1998:Tracking-the-Time-,QingLD2018, KreissDegen2020}
-	\item spell out the link, give it a name?
+	\item spell out the Referential Belief link
 \end{itemize}
 
 
 
-\section{Sun \& Breheny (2020) -- the original experiment}
+\section{Test bed: Sun \& Breheny (2020)}
 
-We replicate \expref{3} of \citeA{sun2020}. 
+We replicate \expref{3} of \citeA{sun2020}, which was concerned with addressing a now classic question in experimental pragmatics: is the processing of scalar inferences delayed relative to the processing of literal information \cite{bott2004, Breheny2006, huang2009, grodner2010, DegenTanenhaus2015, DegenT2016, Tomlinson2013}? In particular,  \citeA{sun2020} were interested in assessing the possible effect of two factors on the speed with which determiners are processed: first, pre-existing low-level associations between determiners and set sizes (i.e., a preference for \emph{all} to be associated with bigger set sizes and for \emph{some} to not show a clear preference, as established in a norming study); and second, whether the application of the determiner to a set of objects can be verified without checking a separate set of objects. For instance, the partial utterance \emph{Click on the boy that has three}, heard in the left display of \figref{fig:display}, requires only verifying that there is a boy with three objects. In contrast, replacing \emph{three} with either \emph{all} or \emph{some} requires additionally verifying that there are no other apples in the display or -- if \emph{some} is pragmatically enriched to \emph{not all} --  that there is at least one other orange in the display, respectively. That is, \emph{all} and \emph{some} should require additional processing time before settling on the target, but if \emph{some} is immediately enriched to \emph{some, but not all}, verification looks to what \citeA{sun2020} call the `residue set' (the remaining objects in the center of the screen) should increase immediately after observing the determiner. 
 
 \begin{figure}[H]
 \centering
@@ -108,33 +111,48 @@ We replicate \expref{3} of \citeA{sun2020}.
 \label{fig:display}
 \end{figure}
 
+Their predictions were borne out (see target advantage scores in  \figref{fig:results-original}). In the determiner window (200ms after determiner onset to 200ms after name onset) and the name window (200ms after name onset to 200ms after noun onset), number terms led to more (and a faster increase in) target looks than did \emph{all} and \emph{some}, suggesting that the need for verification of the residue set is a source of relatively fewer target looks for \emph{all} and \emph{some}. Moreover, while there was no effect of set size in the number or \emph{some} condition, big \emph{all} led to more target looks than small \emph{all}. Finally, and crucially for their purposes, they found that looks to the residue set in the determiner window increased for both \emph{all} and \emph{some} (but not numbers) equally and at the same time. 
+
+Jointly, their results support what they call the fast-pragmatic account: the view that the computation of scalar inferences itself is not delayed compared to literal processing, and that previously reported apparent slowdowns in processing of \emph{some} are instead likely due to joint effects of verification time and low-level set size associations for \emph{all} which facilitate the processing of big \emph{all} compared to small \emph{some}. 
+
+
 \begin{figure}
 \centering
 \includegraphics[width=\columnwidth]{images/results-original}
-\caption{Eye movement results for \expref{3} of \citeA{sun2020}. Shown are target preference scores from instruction onset to instruction offset. Top: target preference scores by determiner type. Bottom: target preference scores by determiner type and target set size. Transparent ribbons indicate standard error.} 
+\caption{Eye movement results for \expref{3} of \citeA{sun2020}. Shown are target preference scores from instruction onset to instruction offset. Top: target preference scores by determiner type. Bottom: target preference scores by determiner type and target set size. Transparent ribbons indicate standard error. \jd{do we really need both these plots? the bottom one has the crucial results.}} 
 \label{fig:results-original}
 \end{figure}
+
+For the purpose of testing the Referential Belief linking assumption, this study has both appealing features as well as one glaring problem. The appealing features include the simple 2x3 design, a limited and clearly defined set of referents in each display, and the clarity of the referential task. The glaring problem, which disqualifies the Referential Belief link as a full linking theory from the outset, are the systematic looks to the residue set: the Referential Belief link is only defined for looks to possible referents. There is no plausible argument to be made that participants look to the residue set because they believe it may be the intended target.  Thus, we have already identified one way in which, if otherwise supported by the data, the Referential Belief link will have to be extended. We return to this point in the General Discussion.
 
 
 \section{Exp.~1: replicating Sun \& Breheny (2020) using web-based eye-tracking}
 
+\jd{\dots will it work? tbd.}
+
 \subsection{Methods}
 
-\textbf{Participants, materials, procedure.}
+\textbf{Participants, materials, procedure.} 
 
 \subsection{Results}
 
 \section{Exp.~2: replicating Sun \& Breheny (2020) using an incremental decision task}
 
+In order to measure participants' beliefs about the intended referent at points in the utterance that would allow us to compare explicit beliefs to proportions of looks in \citeA{sun2020}, participants engaged in an incremental decision task \cite{AllopennaEtAl1998:Tracking-the-Time-,QingLD2018, KreissDegen2020}. 
+
 \subsection{Methods}
 
-\textbf{Participants, materials, procedure.}
+\textbf{Participants.} We recruited 120 participants on Mechanical Turk, of which \jd{XXX} were excluded because \jd{X Y, Z}. 
+
+\textbf{Materials and procedure.} We measured participants' beliefs about the intended referent for each display shown to participants by \citeA{sun2020} (see \figref{fig:display} for examples). Participants were told that they were playing a guessing game, and whenever they made a guess, more words would appear. The critical sentences of the form ``Click on the GENDER who has DETERMINER  of NAME's NOUN" were revealed incrementally. GENDER was one of \emph{boy/girl}, DETERMINER was one of \emph{some/all/two/three}, NAME was one of \emph{Susan/Amy/Michael}, and NOUN was one of \emph{apples/bananas/erasers/scissors/knives/rulers/forks/plates/
+spoons/pencils/pears/oranges}.  Participants clicked on the presumed target after (a) ``Click on the" (baseline window), (b) ``GENDER that has" (gender window), (c) ``DETERMINER of NAME's" (determiner window), and (d) ``NOUN" (noun window). After each click, the next word(s) or display was shown. After 6 practice trials, each participant saw 48 experimental trials, of which 12 were filler trials with the number terms \emph{one} and \emph{four}. The 36 critical trials implemented \citeA{sun2020}'s 2 (big vs.~small target set) by 3 (\emph{all, some}, number) design. 
+
 
 \subsection{Results}
 
-\figref{fig:results-idt} shows target advantage scores for each time window, analogous to \figref{fig:results-original} from \citeA{sun2020}.
+Following \citeA{sun2020}, we computed the target preference score $\ln (\frac{p(\text{target})}{p(\text{competitor})})$ for each time window, where  $p(\text{target})$ and $p(\text{competitor})$ refer to the proportion of target and competitor selections, respectively (see \figref{fig:results-idt}). Proportions were aggregated by subject, determiner, and set size. 
 
-\textbf{Data analysis}. \citeA{sun2020} fit separate regression models to the baseline, gender, determiner, name, and noun windows. We collapsed the name window into the determiner window because the name does not add information. We thus fit mixed-effects logistic regression models to the baseline, gender, determiner, and noun window,\footnote{In fact, fitting models to the noun window was impossible because participants, with very few exceptions, always chose the target. That is, there was no variance to speak of that a model could be estimated to explain.} predicting target over competitor choices from fixed effects of quantifier (reference level: ``number"), centered size (higher value: ``big"), by-item and by-subject random intercepts, and random by-subject slopes for condition and size. No effects reached significance in the baseline, gender, and noun window, as expected. In the determiner window, the window of interest, there were main effects of condition, such that target selections were less likely in both the \emph{some} ($\beta$=-2.90, $SE$=0.36, $p<$.0001) and \emph{all} ($\beta$=-2.92, $SE$=0.36, $p<$.0001) conditions, compared to the number condition. There was no main effect of size, consistent with the visual result that target selections in the number condition are not modulated by  target set size ($\beta$=-0.09, $SE$=0.26, $p<$.73). However, we did observe interactions between quantifier and size, such that small sets led to more target selections for \emph{some} ($\beta$=0.59, $SE$=0.28, $p<$.05) but to fewer target selections for \emph{all} ($\beta$=-1.27, $SE$=0.29, $p<$.0001), compared to number terms. \jd{also report target preference score analysis?}
+\textbf{Data analysis}. \citeA{sun2020} fit separate regression models to the baseline, gender, determiner, name, and noun windows. We collapsed the name window into the determiner window because the name does not add information. We fit mixed-effects logistic regression models\footnote{\citeA{sun2020} ran linear models on the computed target advantage scores. We instead ran logistic models because logistic regression is the more principled approach to modeling categorical data and moreover avoids the problems of having to pre-aggregate data and add smoothing terms to avoid division by zero. The results are qualitatively identical if we instead run linear models on target preference scores. \jd{make sure this is true or delete}} to the baseline, gender, determiner, and noun window,\footnote{In fact, fitting models to the noun window was impossible because participants, with very few exceptions, always chose the target. That is, there was no variance to speak of that a model could be estimated to explain.} predicting target over competitor choices from fixed effects of quantifier (reference level: ``number"), centered size (higher value: ``big"), by-item and by-subject random intercepts, and random by-subject slopes for condition and size. No effects reached significance in the baseline, gender, and noun window, as expected. In the determiner window, the window of interest, there were main effects of condition, such that target selections were less likely in both the \emph{some} ($\beta$=-2.90, $SE$=0.36, $p<$.0001) and \emph{all} ($\beta$=-2.92, $SE$=0.36, $p<$.0001) conditions, compared to the number condition. There was no main effect of size, consistent with the visual result that target selections in the number condition are not modulated by  target set size ($\beta$=-0.09, $SE$=0.26, $p<$.73). However, we did observe interactions between quantifier and size, such that small sets led to more target selections for \emph{some} ($\beta$=0.59, $SE$=0.28, $p<$.05) but to fewer target selections for \emph{all} ($\beta$=-1.27, $SE$=0.29, $p<$.0001), compared to number terms. 
 
 %(Intercept)          3.77254    0.39655   9.513  < 2e-16 ***
 %conditionall        -2.92409    0.36359  -8.042 8.81e-16 *** 		replicates
@@ -146,11 +164,11 @@ We replicate \expref{3} of \citeA{sun2020}.
 \begin{figure}[H]
 \centering
 \includegraphics[width=\columnwidth]{../../analysis/SunBreheny/1_incremental/main/graphs/results-idt}
-\caption{Proportions of target and competitor selections in Exp.~2 by quantifier and set size.} 
+\caption{Target advantage scores in \expref{2} by quantifier and set size. Error bars indicate 95\% bootstrapped confidence intervals.} 
 \label{fig:results-idt}
 \end{figure}
 
-\textbf{Comparison with \citeA{sun2020}: replication analysis}. These results constitute a partial replication of  \citeA{sun2020}, though we will argue that in in fact constitutes a near-exact replication. Most of their effects reported in the determiner window replicated, with two exceptions: we did not observe a main effect of set size, while they did; and we observed an interaction of size and determiner such that small \emph{some} led to greater target selections than big \emph{some}. These differences are not as big as they may seem: in our dataset, the lack of set size main effect can be explained by the interactions with determiner: while size makes no difference at all for number (the determiner predictor reference level), it has the opposite effect for \emph{all} compared to \emph{some}. A similar tendency can be observed in  \citeA{sun2020}'s results when taking into account the joint determiner and name windows. In fact,  \citeA{sun2020} report the absence of a main effect for size in the name window, and instead an interaction between size and determiner. While they do not report the same post hoc analyses, visual inspection of \figref{fig:results-original} suggests that the interaction in the name window is indeed the result of set size having the opposite effect for \emph{all} compared to \emph{some}. Thus, when taking into account their results from both the determiner and name window, which we collapsed into one, the results are qualitatively identical. The different results reported by  \citeA{sun2020} in the two time windows are presumably the result of certain information taking longer to be integrated, something which the incremental decision task by its offline nature cannot capture.
+\textbf{Comparison with \citeA{sun2020}: replication analysis}. These results constitute a near-perfect replication of  \citeA{sun2020}. Most of their effects reported in the determiner window replicated, with two exceptions: we did not observe a main effect of set size, while they did; and we observed an interaction of size and determiner such that small \emph{some} led to greater target selections than big \emph{some}. These differences are not as big as they may seem: in our dataset, the lack of set size main effect can be explained by the interactions with determiner: while size makes no difference at all for number (the determiner predictor reference level), it has the opposite effect for \emph{all} compared to \emph{some}. A similar tendency can be observed in  \citeA{sun2020}'s results when taking into account the joint determiner and name windows. In fact,  \citeA{sun2020} report the absence of a main effect for size in the name window, and instead an interaction between size and determiner. While they do not report the same post hoc analyses, visual inspection of \figref{fig:results-original} suggests that the interaction in the name window is indeed the result of set size having the opposite effect for \emph{all} compared to \emph{some}. Thus, when taking into account their results from both the determiner and name window, which we collapsed into one, the results are qualitatively identical. The different results reported by  \citeA{sun2020} in the two time windows are presumably the result of certain information taking longer to be integrated, something which the incremental decision task by its offline nature cannot capture. \jd{if time, re-analyze their results with logistic models?}
 
 \textbf{Comparison with \citeA{sun2020}: linking function analysis}. The overall correlation between proportion of selections and proportions of looks, where proportions were calculated separately by region of interest (target, competitor, distractors), time window (baseline, gender, determiner$+$name, noun), determiner (\emph{all, some}, number), and set size (big, small), was high ($r(70) = .69$). At the individual
 
@@ -174,6 +192,61 @@ We replicate \expref{3} of \citeA{sun2020}.
 
 \section{General discussion}
 
+\begin{itemize}
+	\item main point: in contrast to previous re-analysis of leffel et al, clear support for the Referential Belief link. reasons? 
+	\begin{itemize}
+		\item most likely: participants in SB expected the observed language (see preliminary production results from Qing et al, but also Kreiss and Degen 2020 results, plus tons of other literature supporting tight link between production and comprehension in general, and importance of clearly nameable items (ie, clear production expectations) for VW eye-tracking in particular (go back to mike's papers from the oughts)
+		\item possibly more power in SB than Leffel
+	\end{itemize}
+	\item pick the residue set issue back up -- possible extensions of Referential Belief link?
+	\item methodological points:
+		\begin{itemize}
+			\item further validation of incermental decision task as useful measure of comprehension
+			\item The additional replication suggests that web-based eye-tracking using the webgazer library is a) feasible; and b) a faster, cheaper way to collect eye movement data despite the added noise.
+		\end{itemize}
+	\item theoretical connection: more fine-grained RSA story that can capture the pref for small over big "some" despite "some" being bad for both; goes beyond (against?) the simple (SB and degen tanenhaus 2015/2016) production expectation story that only takes into account the probability of "some" being used for the bigger vs the smaller set. if we apply RSA, where what matters to interpretation is not just the relative probability of "some" being used for one vs the other set size, but it also matters how likely "all" and other alternatives are for the set sizes under consideration, then I think this result is expected as long as we assume that "all" is generally highly dispreferred for the small set and highly preferred for the big set. see example numbers below (assuming a uniform prior), where S is the pragmatic speaker and L is the pragmatic listener:
+\end{itemize}
+
+Hypothetical speaker distribution for small set:
+\begin{eqnarray*}
+S("two"|small) = .8\\
+S("three"|small) = 0\\
+S("all"|small) = .05\\
+S("some"|small) = .15\\
+\end{eqnarray*}
+
+Hypothetical speaker distribution for big set:
+\begin{eqnarray*}
+S("two"|big) = 0\\
+S("three"|big) = .6\\
+S("all"|big) = .3\\
+S("some"|big) = .1\\
+\end{eqnarray*}
+
+The above speaker assumptions result in (observed) small target advantage for small-some over big-some:
+\begin{eqnarray*}
+L(small|"some") =  \frac{S("some"|small)}{(S("some"|small) + S("some"|big))} \\
+= .15 / (.15+.1) = .6\\
+L(big|"some") = \frac{S("some"|big)}{(S("some"|small) + S("some"|big))} \\
+= .1 / (.15+.1) = .4
+\end{eqnarray*}
+
+The above speaker assumptions result in (observed) large target advantage for big-all over small-all:
+\begin{eqnarray*}
+L(small|"all") = \frac{S("all"|small)}{(S("all"|small) + S("all"|big))}\\ 
+= .05 / (.05+.3) = .14\\
+L(big|"all") = .3 / (.05+.3) = .86
+\end{eqnarray*}
+
+Numbers behave categorically (assuming exact semantics):
+\begin{eqnarray*}
+L(small|"two") = 1\\
+L(big|"two") = 0\\
+L(small|"three") = 0\\
+L(big|"three") = 1
+\end{eqnarray*}
+
+\dots of course this all just captures the categorical belief data and can't handle verification (eg looks to residue set) at all; must bridge to algorithmic level
 
 %\begin{table}[H]
 %\begin{center} 
