@@ -258,6 +258,7 @@ function make_slides(f) {
       if (!exp.DUMMY_MODE) {
         hideVideoElements();
         startGazer();
+        hideVideoElements();
         //console.log("started gazer")
         webgazer.setGazeListener(function (data, elapsedTime) {
           if (data == null) {
