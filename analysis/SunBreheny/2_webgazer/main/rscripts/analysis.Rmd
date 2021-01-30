@@ -199,7 +199,7 @@ dd = tmp %>%
                          look=="center" ~ "center",
                          TRUE ~ "other")) %>%
   mutate(target_look = ifelse(ROI == "target", 1, 0), competitor_look = ifelse(ROI == "competitor", 1, 0), center_look = ifelse(ROI == "center", 1, 0), other_look = ifelse(ROI == "other", 1, 0))  %>%
-  filter(x > -2000 & x < 3000 & y > -2000 & y < 2000) #%>%
+  filter(x > -2000 & x < 3000 & y > -2000 & y < 2000)
 
 # sanity check that ROIs are getting correctly assigned
 sanity = ggplot(dd, aes(x=x,y=y,color=look)) +

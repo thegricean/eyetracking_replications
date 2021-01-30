@@ -80,7 +80,6 @@ function make_slides(f) {
     name: "practice",
     start: function () {
       $(".err").hide();
-      console.log("in practice")
     },
     present: exp.practice,
     present_handle: function (stim) {
@@ -155,7 +154,7 @@ function make_slides(f) {
         aud.src = "audio/" + exp.prime + ".wav";
         aud.currentTime = 0;
         aud.play();
-        console.log("Play audio")
+        // console.log("Play audio")
         exp.audio_play_unix = Date.now();
         exp.playing = true;
         // when audio ends
@@ -237,8 +236,8 @@ function make_slides(f) {
       exp.unix_rt = 0;
       exp.trial_start = Date.now();
       exp.playing = false;
-      console.log("******************************")
-      console.log("Trial start: ", exp.trial_start)
+      // console.log("******************************")
+      // console.log("Trial start: ", exp.trial_start)
 
       $(".err").hide();
       
@@ -254,6 +253,17 @@ function make_slides(f) {
       $(".loc9").attr('src', "images/girl.png");
       $(".loc10").attr('src', "images/girl.png");
       $(".imgwrapper").show();
+
+      // console.log("TESTING")
+      // console.log("loc1", stim.location1)
+      // console.log("loc2", stim.location2)
+      // console.log("loc3", stim.location3)
+      // console.log("loc4", stim.location4)
+      // console.log("target item", stim.target_object3)
+      // console.log("target location1", stim.target1)
+      // console.log("target location2", stim.target2)
+      // console.log("audio file", stim.Prime)
+      // console.log("instruction", stim.instruction3)
 
       if (!exp.DUMMY_MODE) {
         hideVideoElements();
@@ -274,7 +284,7 @@ function make_slides(f) {
         });
       }
 
-      console.log("Wait 1sec")
+      // console.log("Wait 1sec")
       exp.prime = this.stim.Prime
 
       // 1 sec preview before audio
@@ -283,7 +293,7 @@ function make_slides(f) {
         aud.src = "audio/" + exp.prime + ".wav";
         aud.currentTime = 0;
         aud.play();
-        console.log("Play audio")
+        // console.log("Play audio")
         exp.audio_play_unix = Date.now();
         exp.playing = true;
         // when audio ends
@@ -308,11 +318,11 @@ function make_slides(f) {
     button: function () {
       webgazer.pause();
       exp.rt = exp.unix_rt - exp.trial_start;
-      console.log("Trial start: ", exp.trial_start)
-      console.log("Selection: ", exp.selection);
-      console.log("RT: ", exp.rt);
-      console.log("Unix RT: ", exp.unix_rt);
-      console.log("Audio play unix: ", exp.audio_play_unix)
+      // console.log("Trial start: ", exp.trial_start)
+      // console.log("Selection: ", exp.selection);
+      // console.log("RT: ", exp.rt);
+      // console.log("Unix RT: ", exp.unix_rt);
+      // console.log("Audio play unix: ", exp.audio_play_unix)
       this.log_responses();
       exp.tlist = [];
       exp.unixtlist = [];
@@ -446,7 +456,7 @@ function init() {
   preload();
 
   //Experiment constants
-  exp.DUMMY_MODE = false; // set to true if want to test without eyetracking
+  exp.DUMMY_MODE = true; // set to true if want to test without eyetracking
   exp.N_TRIALS = 54
   PRECISION_CUTOFF = 50;
   IMG_HEIGHT = 110   // size of imgs - just for your records -- TODO: change
