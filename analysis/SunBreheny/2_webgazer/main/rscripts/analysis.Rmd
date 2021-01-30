@@ -95,8 +95,12 @@ nrow(d) # 3331 trials for analysis, 553-558 in each of the 6 conditions
 Plot subject information.
 ```{r}
 participants = d %>% 
-  select(workerid,subject_information.accuracy,subject_information.age,subject_information.camblock,subject_information.comments, subject_information.eyesight, subject_information.eyesight_task, subject_information.gender, subject_information.headphones, language, subject_information.previous_accuracy_attempts, subject_information.time_in_minutes) %>% 
+  select(workerid,subject_information.accuracy,subject_information.age,subject_information.camblock,subject_information.comments, subject_information.eyesight, subject_information.eyesight_task, subject_information.gender, subject_information.headphones, language, subject_information.previous_accuracy_attempts, subject_information.time_in_minutes,system.Browser,system.OS) %>% 
   unique()
+
+unique(participants$subject_information.comments)
+unique(participants[,c("system.Browser","system.OS","subject_information.comments")])
+View(participants[,c("system.Browser","system.OS","subject_information.comments")])
 
 # number of unique participants:
 nrow(participants) # 93 unique participants
@@ -126,6 +130,8 @@ ggplot(participants, aes(x=subject_information.eyesight,fill=subject_information
 # distribution of camera views -- some people continued to see camera view even during experiment (bug we haven't figured out yet how to fix) 39 people :(
 ggplot(participants, aes(x=subject_information.camblock,fill=subject_information.camblock)) +
   geom_histogram(stat="count")
+prop.table(table(participants$subject_information.camblock))
+
 
 # distribution of headphone use
 ggplot(participants, aes(x=subject_information.headphones)) +
