@@ -178,10 +178,11 @@ table(d$condition,d$size)
 Separate time and x/y coordinates into separate data points, one per row, and define regions of interest (ROIs).
 ```{r,message=F,warning=F}
 # set width and height of ROIs
-wpadding = 60
-hpadding = 30
+wipadding = 60 # inside width padding (towards center)
+wopadding = 0 # outside width padding (out of the 1280 edges on either side, since images are smooshed right up against the edge)
+hpadding = 0 # only add inside padding (towards center), because there is already 25px padding above/below image 
 imgwidth = 107 + 110 # boy/girl + objects + padding
-imgheight = 200  # boy/girl (taller than objects) + padding
+imgheight = 250  # boy/girl + objects from top edge
 
 center_imgwidth = 220 # objects
 center_imgheight = 110 # objects
@@ -195,23 +196,23 @@ dd = tmp %>%
   mutate(x_center = (system.windowW/2), 
          y_center = (system.windowH/2),
          
-           AOI_topleft_x_min = x_center - (scene_width/2),# - wpadding,
-           AOI_topleft_x_max = x_center - (scene_width/2) + imgwidth + wpadding,
+           AOI_topleft_x_min = x_center - (scene_width/2) - wopadding,
+           AOI_topleft_x_max = x_center - (scene_width/2) + imgwidth + wipadding,
            AOI_topleft_y_min = y_center + (scene_height/2) - imgheight - hpadding,
            AOI_topleft_y_max = y_center + (scene_height/2),# + hpadding,
          
-           AOI_bottomleft_x_min = x_center - (scene_width/2),# - wpadding,
-           AOI_bottomleft_x_max = x_center - (scene_width/2) + imgwidth + wpadding,
+           AOI_bottomleft_x_min = x_center - (scene_width/2) - wopadding,
+           AOI_bottomleft_x_max = x_center - (scene_width/2) + imgwidth + wipadding,
            AOI_bottomleft_y_min = y_center - (scene_height/2),# - hpadding,
            AOI_bottomleft_y_max = y_center - (scene_height/2) + imgheight + hpadding,
          
-           AOI_topright_x_min = x_center + (scene_width/2) - imgwidth - wpadding,
-           AOI_topright_x_max = x_center + (scene_width/2),# + wpadding,
+           AOI_topright_x_min = x_center + (scene_width/2) - imgwidth - wipadding,
+           AOI_topright_x_max = x_center + (scene_width/2) + wopadding,
            AOI_topright_y_min = y_center + (scene_height/2) - imgheight - hpadding,
            AOI_topright_y_max = y_center + (scene_height/2),# + hpadding,
          
-           AOI_bottomright_x_min = x_center + (scene_width/2) - imgwidth - wpadding,
-           AOI_bottomright_x_max = x_center + (scene_width/2),# + wpadding,
+           AOI_bottomright_x_min = x_center + (scene_width/2) - imgwidth - wipadding,
+           AOI_bottomright_x_max = x_center + (scene_width/2) + wopadding,
            AOI_bottomright_y_min = y_center - (scene_height/2),# - hpadding,
            AOI_bottomright_y_max = y_center - (scene_height/2) + imgheight + hpadding,
          
@@ -447,6 +448,7 @@ ggplot(toplot, aes(x=binned_time_relative,y=proportion)) +
   geom_text(data=windows,aes(label=window,x=x),y=.78,size=2) +
   xlab("Time in ms relative to target word onset") +
   ylab("Proportion of looks") +
+  scale_x_continuous(breaks=seq(0,4000,by=400),minor_breaks = seq(200,3800,by=400)) +
   #geom_text(data=annotations,aes(label=Label)) +
   facet_wrap(~determiner,nrow=3)
 ggsave("../graphs/prop_looks_tc.pdf",height=8,width=6)
@@ -493,7 +495,7 @@ vlinesize=.5
 
 ggplot(toplot, aes(x=binned_time_relative,y=proportion)) +
   geom_line(size=1, aes(color=region,linetype=size)) +
-  geom_ribbon(aes(ymin=ymin,ymax=ymax,fill=region),alpha=.3) +
+  geom_ribbon(aes(ymin=ymin,ymax=ymax,fill=region,fill=size),alpha=.3) +
   scale_color_manual(values=cbPalette[2:5]) +
   scale_fill_manual(values=cbPalette[2:5]) +
   geom_vline(aes(xintercept=onsets$gender),size=vlinesize) +
@@ -503,6 +505,7 @@ ggplot(toplot, aes(x=binned_time_relative,y=proportion)) +
   geom_text(data=windows,aes(label=window,x=x),y=.78,size=2) +
   xlab("Time in ms relative to target word onset") +
   ylab("Proportion of looks") +
+  scale_x_continuous(breaks=seq(0,4000,by=400),minor_breaks = seq(200,3800,by=400)) +
   #geom_text(data=annotations,aes(label=Label)) +
   facet_wrap(~determiner,nrow=3)
 ggsave("../graphs/prop_looks_condsize_tc.pdf",height=8,width=6)
@@ -516,16 +519,16 @@ dd_binned$item = as.factor(paste(dd_binned$Noun,dd_binned$Name)) # item and noun
 smooth = .00000001
 agr = dd_binned %>% 
   filter(target_look == 1 | competitor_look == 1) %>% 
-  group_by(condition,binned_time_relative) %>% 
-  # group_by(condition,workerid,binned_time_relative) %>% # it would be better to group by more variables, but it's just too noisy!
+  # group_by(condition,binned_time_relative) %>% 
+  group_by(condition,workerid,binned_time_relative) %>% # it would be better to group by more variables, but it's just too noisy!
   summarize(target_prop=mean(target_look)+smooth,competitor_prop=mean(competitor_look)+smooth) %>% 
   ungroup() %>% 
-  mutate(target_adv=log(competitor_prop/target_prop)) %>% # reverse this once
-  # mutate(target_advantage_item=log(competitor_prop/target_prop)) %>% # reverse this once targ/comp looks fixed
-  # group_by(condition,binned_time_relative) %>% 
-  # summarize(target_adv=mean(target_advantage_item),target_adv_CILow=ci.low(target_advantage_item),target_adv_CIHigh=ci.high(target_advantage_item)) %>% 
-  # ungroup() %>% 
-  # mutate(target_adv_ymin=target_adv-target_adv_CILow,target_adv_ymax=target_adv+target_adv_CIHigh) %>% 
+  # mutate(target_adv=log(competitor_prop/target_prop)) %>% # reverse this once
+  mutate(target_advantage_item=log(competitor_prop/target_prop)) %>% # reverse this once targ/comp looks fixed
+  group_by(condition,binned_time_relative) %>%
+  summarize(target_adv=mean(target_advantage_item),target_adv_CILow=ci.low(target_advantage_item),target_adv_CIHigh=ci.high(target_advantage_item)) %>%
+  ungroup() %>%
+  mutate(target_adv_ymin=target_adv-target_adv_CILow,target_adv_ymax=target_adv+target_adv_CIHigh) %>%
   mutate(determiner = fct_relevel(condition,"all","some"))
 
 ```
@@ -538,7 +541,7 @@ vlinesize=.5
 
 ggplot(agr, aes(x=binned_time_relative,y=target_adv)) +
   geom_line(size=1, aes(color=determiner)) +
-  # geom_ribbon(aes(ymin=target_adv_ymin,ymax=target_adv_ymax,fill=determiner),alpha=.3) +
+  geom_ribbon(aes(ymin=target_adv_ymin,ymax=target_adv_ymax,fill=determiner),alpha=.3) +
   scale_color_manual(values=cbPalette[2:5]) +
   scale_fill_manual(values=cbPalette[2:5]) +
   geom_vline(aes(xintercept=onsets$gender),size=vlinesize) +
