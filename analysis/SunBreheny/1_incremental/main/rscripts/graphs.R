@@ -1,6 +1,6 @@
 library(tidyverse)
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 source("helpers.R")
 setwd('../data')
 theme_set(theme_bw())
@@ -326,29 +326,206 @@ ggplot(toplot, aes(x=prop_selections, y=prop_looks)) +
 # guides(fill=guide_legend(nrow=2,byrow=TRUE))
 ggsave("../graphs/correlations-bycondition.pdf",width=6,height=4)
 
-# proportion of looks to target & competitor
-gaze =  g %>%
-  filter(TrackLoss=="FALSE") %>%
-  select(Prime,condition,determiner,size,targetlook,competitorlook,residuelook,whichword,item) %>%
+
+# PLOT PROPORTIONS OF LOOKS
+
+# proportion of looks to target, competitor, and residue
+gazer =  g %>%
+  filter(TrackLoss=="FALSE" & time < 300) %>%
+  select(Prime,condition,determiner,size,targetlook,competitorlook,residuelook,whichword,item,time) %>%
   mutate(distractorlook=ifelse(targetlook=="1",0,ifelse(competitorlook=="1",0,ifelse(residuelook=="1",0,1)))) %>%
-  mutate(window=as.character(whichword)) %>%
-  mutate(window = ifelse(whichword =="determiner","determiner+name", ifelse(whichword=="name","determiner+name",ifelse(whichword=="end","noun",window)))) %>%
+  # mutate(window=as.character(whichword)) %>%
+  # mutate(window = ifelse(whichword =="determiner","determiner+name", ifelse(whichword=="name","determiner+name",ifelse(whichword=="end","noun",window)))) %>%
   filter(targetlook == 1 | competitorlook == 1 | residuelook== 1) %>% #CHANGE
   #filter(targetlook == 1 | competitorlook == 1) %>% #CHANGE
-  group_by(condition,size,window) %>%
-  summarize(Mean_target_look=mean(targetlook),Mean_competitor_look=mean(competitorlook),Mean_distractor_look=mean(distractorlook),target_ci_low=ci.low(targetlook),target_ci_high=ci.high(targetlook),competitor_ci_low=ci.low(competitorlook),competitor_ci_high=ci.high(competitorlook)) %>%
+  group_by(time,condition,size) %>%
+  summarize(Mean_target_look=mean(targetlook),Mean_competitor_look=mean(competitorlook),Mean_residue_look=mean(residuelook),target_ci_low=ci.low(targetlook),target_ci_high=ci.high(targetlook),competitor_ci_low=ci.low(competitorlook),competitor_ci_high=ci.high(competitorlook),residue_ci_low=ci.low(residuelook),residue_ci_high=ci.high(residuelook)) %>%
   ungroup() %>%
-  #mutate(YMin=Mean_target_look-target_ci_low,YMax=Mean_target_look+target_ci_high) #%>%
-  mutate(YMin=Mean_competitor_look-competitor_ci_low,YMax=Mean_competitor_look+competitor_ci_high)
-  
-ggplot(gaze, aes(x=window, y=Mean_competitor_look, color=condition, linetype=size,group=interaction(condition,size))) +
-  geom_line(size=1.3,position=dodge) +
-  geom_point(size=2.5,shape="square",position=dodge) +
-  geom_errorbar(aes(ymin=YMin, ymax=YMax), width=.2, alpha=.7,  linetype="solid",position=dodge) +
-  #facet_grid(size ~condition ) + 
+  mutate(YMin_target=Mean_target_look-target_ci_low,YMax_target=Mean_target_look+target_ci_high,YMin_competitor=Mean_competitor_look-competitor_ci_low,YMax_competitor=Mean_competitor_look+competitor_ci_high,YMin_residue=Mean_residue_look-residue_ci_low,YMax_residue=Mean_residue_look+residue_ci_high)
+
+# prepare data for plotting
+long_props = gazer %>% 
+  select(condition,size,time,Mean_target_look,Mean_residue_look,Mean_competitor_look) %>%  #,other_prop) %>% 
+  pivot_longer(cols = Mean_target_look:Mean_competitor_look,names_to=c("region"),values_to=c("proportion")) %>% 
+  separate(region,c(NA,"region",NA))
+
+long_ymin = gazer %>% 
+  select(condition,size,time,YMin_target,YMin_residue,YMin_competitor) %>%  #,other_prop) %>% 
+  pivot_longer(cols = YMin_target:YMin_competitor,names_to=c("region"),values_to=c("ymin")) %>% 
+  separate(region,c(NA,"region"))
+
+long_ymax = gazer %>% 
+  select(condition,size,time,YMax_target,YMax_residue,YMax_competitor) %>%  #,other_prop) %>% 
+  pivot_longer(cols = YMax_target:YMax_competitor,names_to=c("region"),values_to=c("ymax")) %>% 
+  separate(region,c(NA,"region"))
+
+toplot = long_props %>%
+  left_join(long_ymin,by=c("condition","size","time","region")) %>%
+  left_join(long_ymax,by=c("condition","size","time","region")) %>%
+  mutate(region = fct_relevel(region,"target","competitor"),determiner = fct_relevel(as.factor(condition),"all","some"))
+
+offset = 71
+windowsize = 15.9 #ms
+onsets = g %>% 
+  summarize(gender=mean(gender_onset)*windowsize-1000,determiner=mean(determiner_onset)*windowsize-1000,name=mean(name_onset)*windowsize-1000,noun=mean(noun_onset)*windowsize-1000)
+
+windows = tibble(window=c("baseline","gender","determiner","name","noun"),x=c(24+offset,70+offset,118+offset,159+offset,188+offset)*windowsize-1000)
+vlinesize=.5
+
+toplot$ttime = (toplot$time*windowsize)-1000
+
+ggplot(toplot, aes(x=ttime, y=proportion)) +
+  geom_line(size=1, aes(color=determiner,linetype=size)) +
+  geom_ribbon(aes(ymin=ymin,ymax=ymax,fill=determiner,group=interaction(determiner,size)),alpha=.3) +
+  scale_fill_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
   scale_color_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
-  scale_x_discrete(limits = c("baseline", "gender", "determiner+name","noun"))+
-  xlab("Window") +
-  ylab("Proportion of looks to competitor") #+
+  geom_vline(aes(xintercept=onsets$gender),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$determiner),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$name),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$noun),size=vlinesize) +
+  geom_text(data=windows,aes(label=window,x=x),y=.9,size=2) +
+  xlab("Time in ms relative to audio onset") +
+  ylab("Proportion of looks to target") +  
+  scale_x_continuous(breaks=seq(0,4000,by=400),minor_breaks = seq(200,3800,by=400)) +
+  facet_wrap(~region)
 # theme(axis.text.x=element_text(angle=30,hjust=1,vjust=1))
-ggsave("../graphs/results-competitor-with-residue.pdf",width=4.5,height=3)
+ggsave("../graphs/proportions_condsize_withresidue.pdf",width=9,height=3)
+
+# only target and residue looks
+ttoplot = toplot %>% 
+  filter(region == "target" | region == "residue") %>% 
+  droplevels()
+
+ggplot(ttoplot, aes(x=ttime, y=proportion)) +
+  geom_line(size=1, aes(color=determiner,linetype=size)) +
+  geom_ribbon(aes(ymin=ymin,ymax=ymax,fill=determiner,group=interaction(determiner,size)),alpha=.3) +
+  scale_fill_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
+  scale_color_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
+  geom_vline(aes(xintercept=onsets$gender),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$determiner),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$name),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$noun),size=vlinesize) +
+  geom_text(data=windows,aes(label=window,x=x),y=.95,size=2.5) +
+  xlab("Time in ms relative to audio onset") +
+  ylab("Proportion of looks to region") +  
+  scale_x_continuous(breaks=seq(0,4000,by=400),minor_breaks = seq(200,3800,by=400)) +
+  facet_wrap(~region)
+# theme(axis.text.x=element_text(angle=30,hjust=1,vjust=1))
+ggsave("../graphs/proportions_condsize_withresidue_tr.pdf",width=9,height=3)
+
+# only target looks
+ttoplot = toplot %>% 
+  filter(region == "target") %>% 
+  droplevels()
+
+ggplot(ttoplot, aes(x=ttime, y=proportion)) +
+  geom_line(size=1, aes(color=determiner,linetype=size)) +
+  geom_ribbon(aes(ymin=ymin,ymax=ymax,fill=determiner,group=interaction(determiner,size)),alpha=.3) +
+  scale_fill_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
+  scale_color_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
+  geom_vline(aes(xintercept=onsets$gender),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$determiner),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$name),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$noun),size=vlinesize) +
+  geom_text(data=windows,aes(label=window,x=x),y=.9,size=2) +
+  xlab("Time in ms relative to audio onset") +
+  ylab("Proportion of looks to target") +  
+  scale_x_continuous(breaks=seq(0,4000,by=400),minor_breaks = seq(200,3800,by=400)) 
+# theme(axis.text.x=element_text(angle=30,hjust=1,vjust=1))
+ggsave("../graphs/proportions_condsize_withresidue_target.pdf",width=5,height=3)
+
+
+
+# > g %>% group_by(whichword) %>% summarize(mintime=min(time),meantime=mean(time),mediantime=median(time),maxtime=max(time))
+# # A tibble: 5 x 5
+# whichword  mintime meantime mediantime maxtime
+# * <chr>        <int>    <dbl>      <dbl>   <int>
+#   1 baseline        72      93         93      114
+# 2 determiner     171     191.       191      212
+# 3 end            244     287.       274      868
+# 4 gender         115     142.       142.     170
+# 5 name           212     228.       227      244
+
+# proportion of looks to target and competitor
+gaze =  g %>%
+  filter(TrackLoss=="FALSE" & time < 300) %>%
+  select(Prime,condition,determiner,size,targetlook,competitorlook,residuelook,whichword,item,time) %>%
+  mutate(distractorlook=ifelse(targetlook=="1",0,ifelse(competitorlook=="1",0,ifelse(residuelook=="1",0,1)))) %>%
+  # mutate(window=as.character(whichword)) %>%
+  # mutate(window = ifelse(whichword =="determiner","determiner+name", ifelse(whichword=="name","determiner+name",ifelse(whichword=="end","noun",window)))) %>%
+  filter(targetlook == 1 | competitorlook == 1) %>% #CHANGE
+  #filter(targetlook == 1 | competitorlook == 1) %>% #CHANGE
+  group_by(time,condition,size) %>%
+  summarize(Mean_target_look=mean(targetlook),Mean_competitor_look=mean(competitorlook),target_ci_low=ci.low(targetlook),target_ci_high=ci.high(targetlook),competitor_ci_low=ci.low(competitorlook),competitor_ci_high=ci.high(competitorlook)) %>%
+  ungroup() %>%
+  mutate(YMin_target=Mean_target_look-target_ci_low,YMax_target=Mean_target_look+target_ci_high,YMin_competitor=Mean_competitor_look-competitor_ci_low,YMax_competitor=Mean_competitor_look+competitor_ci_high)
+
+# prepare data for plotting
+long_props = gaze %>% 
+  select(condition,size,time,Mean_target_look,Mean_competitor_look) %>%  #,other_prop) %>% 
+  pivot_longer(cols = Mean_target_look:Mean_competitor_look,names_to=c("region"),values_to=c("proportion")) %>% 
+  separate(region,c(NA,"region",NA))
+
+long_ymin = gaze %>% 
+  select(condition,size,time,YMin_target,YMin_competitor) %>%  #,other_prop) %>% 
+  pivot_longer(cols = YMin_target:YMin_competitor,names_to=c("region"),values_to=c("ymin")) %>% 
+  separate(region,c(NA,"region"))
+
+long_ymax = gaze %>% 
+  select(condition,size,time,YMax_target,YMax_competitor) %>%  #,other_prop) %>% 
+  pivot_longer(cols = YMax_target:YMax_competitor,names_to=c("region"),values_to=c("ymax")) %>% 
+  separate(region,c(NA,"region"))
+
+toplot = long_props %>%
+  left_join(long_ymin,by=c("condition","size","time","region")) %>%
+  left_join(long_ymax,by=c("condition","size","time","region")) %>%
+  mutate(region = fct_relevel(region,"target","competitor"),determiner = fct_relevel(as.factor(condition),"all","some"))
+
+# dodge=position_dodge(.9)
+offset = 71
+windowsize = 15.9 #ms
+onsets = g %>% 
+  summarize(gender=mean(gender_onset)*windowsize-1000,determiner=mean(determiner_onset)*windowsize-1000,name=mean(name_onset)*windowsize-1000,noun=mean(noun_onset)*windowsize-1000)
+
+windows = tibble(window=c("baseline","gender","determiner","name","noun"),x=c(24+offset,70+offset,118+offset,159+offset,188+offset)*windowsize-1000)
+vlinesize=.5
+
+toplot$ttime = (toplot$time*windowsize)-1000
+
+ggplot(toplot, aes(x=ttime, y=proportion)) +
+  geom_line(size=1, aes(color=determiner,linetype=size)) +
+  geom_ribbon(aes(ymin=ymin,ymax=ymax,fill=determiner,group=interaction(determiner,size)),alpha=.3) +
+  scale_fill_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
+  scale_color_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
+  geom_vline(aes(xintercept=onsets$gender),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$determiner),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$name),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$noun),size=vlinesize) +
+  geom_text(data=windows,aes(label=window,x=x),y=.9,size=2) +
+  xlab("Time in ms relative to audio onset") +
+  ylab("Proportion of looks to target") +  
+  scale_x_continuous(breaks=seq(0,4000,by=400),minor_breaks = seq(200,3800,by=400)) +
+  facet_wrap(~region)
+# theme(axis.text.x=element_text(angle=30,hjust=1,vjust=1))
+ggsave("../graphs/proportions_condsize.pdf",width=7,height=3)
+
+# only target looks
+ttoplot = toplot %>% 
+  filter(region == "target") %>% 
+  droplevels()
+
+ggplot(ttoplot, aes(x=ttime, y=proportion)) +
+  geom_line(size=1, aes(color=determiner,linetype=size)) +
+  geom_ribbon(aes(ymin=ymin,ymax=ymax,fill=determiner,group=interaction(determiner,size)),alpha=.3) +
+  scale_fill_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
+  scale_color_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
+  geom_vline(aes(xintercept=onsets$gender),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$determiner),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$name),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$noun),size=vlinesize) +
+  geom_text(data=windows,aes(label=window,x=x),y=.9,size=2) +
+  xlab("Time in ms relative to audio onset") +
+  ylab("Proportion of looks to target") +  
+  scale_x_continuous(breaks=seq(0,4000,by=400),minor_breaks = seq(200,3800,by=400)) 
+# theme(axis.text.x=element_text(angle=30,hjust=1,vjust=1))
+ggsave("../graphs/proportions_condsize_target.pdf",width=5,height=3)

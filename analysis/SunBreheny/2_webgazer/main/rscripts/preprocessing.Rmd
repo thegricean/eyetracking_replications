@@ -26,7 +26,8 @@ source("helpers.R")
 audio_info = read_excel("../data/audiotimes.xlsx")
 
 # set color-blind-friendly color palette
-cbPalette <- c("#56B4E9", "#D55E00", "#009E73","#999999", "#E69F00","#009E73","#56B4E9", "#D55E00", "#009E73","#999999", "#E69F00","#009E73","#56B4E9", "#D55E00", "#009E73","#999999", "#E69F00","#009E73","#56B4E9", "#D55E00", "#009E73","#999999", "#E69F00","#009E73")
+# color-blind-friendly palette
+cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7") 
 
 # load data 
 d = read.csv('../data/sunbreheny_webgazer_main_experiment-merged.csv') %>%
@@ -184,8 +185,9 @@ hpadding = 0 # only add inside padding (towards center), because there is alread
 imgwidth = 107 + 110 # boy/girl + objects + padding
 imgheight = 250  # boy/girl + objects from top edge
 
-center_imgwidth = 220 # objects
-center_imgheight = 110 # objects
+centerpadding = 0 #30
+center_imgwidth = 220 + centerpadding # objects
+center_imgheight = 110 + centerpadding # objects
 
 scene_width = 1280 # everything takes place in a central 'scene' of  1280 x 750 pixels 
 scene_height = 750 
@@ -231,14 +233,20 @@ dd = tmp %>%
                          look==competitor_location ~ "competitor",
                          look=="center" ~ "center",
                          TRUE ~ "other")) %>%
-  mutate(target_look = ifelse(ROI == "target", 1, 0), competitor_look = ifelse(ROI == "competitor", 1, 0), center_look = ifelse(ROI == "center", 1, 0), other_look = ifelse(ROI == "other", 1, 0))  %>%
+  mutate(target_look = ifelse(ROI == "competitor", 1, 0), competitor_look = ifelse(ROI == "target", 1, 0), center_look = ifelse(ROI == "center", 1, 0), other_look = ifelse(ROI == "other", 1, 0))  %>% # for some reason, target/competitor looks reversed and just CANNOT figure out where the error is occurring, so hacky fix here :(((
   filter(x > -1000 & x < 2280 & y > -1000 & y < 1750) #%>%
 
 nrow(dd) # 716642 (with exclusions)
 
 # sanity check that ROIs are getting correctly assigned
-sanity = ggplot(dd, aes(x=x,y=y,color=look)) +
-  geom_point(size=.5,alpha=.4) +
+accuracies = dd %>% 
+  select(workerid,subject_information.accuracy) %>% 
+  unique() %>% 
+  mutate(x=0,y=1500)
+
+sanity = ggplot(dd,aes(x=x,y=y)) +
+  geom_point(aes(color=look), size=.5,alpha=.4) +
+  geom_text(data=accuracies,aes(label=subject_information.accuracy)) +
   facet_wrap(~workerid)
 ggsave(sanity,file="../graphs/sanity.pdf",width=25,height=25)
 ```
@@ -266,10 +274,10 @@ first_samples = dd %>%
 # total number of samples:
 nrow(first_samples)
 
-# set size of time bins to collapse over
+# size of time bins to collapse over
 binsize = 100
 
-# bin samples and align to gender word onset
+# bin samples and align to audio onset
 dd_binned = dd %>% 
   left_join(first_samples,by=c("workerid","slide_number")) %>% 
   mutate(first_sample = as.numeric(first_sample)) %>% 
@@ -293,6 +301,7 @@ Plot proportions of looks to all regions (target, competitor, center) by determi
 ```{r message=F, warning=F}
 # aggregate looks (compute proportions of looks to each region in each time bin and condition; add 95% bootstrapped confidence intervals)
 agr = dd_binned %>% 
+  filter(target_look == 1 | competitor_look == 1 | center_look == 1) %>% 
   group_by(condition,binned_time_relative) %>% 
   summarize(target_prop=mean(target_look),target_CILow=ci.low(target_look),target_CIHigh=ci.high(target_look),competitor_prop=mean(competitor_look),competitor_CILow=ci.low(competitor_look),competitor_CIHigh=ci.high(competitor_look),center_prop=mean(center_look),center_CILow=ci.low(center_look),center_CIHigh=ci.high(center_look)) %>%  #,other_prop=mean(other_look),other_CILow=ci.low(other_look),other_CIHigh=ci.high(other_look)) %>% 
   ungroup() %>% 
@@ -347,6 +356,7 @@ Plot proportions of looks to all regions (target, competitor, center) by determi
 ```{r message=F, warning=F}
 # aggregate looks (compute proportions of looks to each region in each time bin and determiner/size condition; add 95% bootstrapped confidence intervals)
 agr = dd_binned %>% 
+  filter(target_look == 1 | competitor_look == 1 | center_look == 1) %>% 
   group_by(condition,size,binned_time_relative) %>% 
   summarize(target_prop=mean(target_look),target_CILow=ci.low(target_look),target_CIHigh=ci.high(target_look),competitor_prop=mean(competitor_look),competitor_CILow=ci.low(competitor_look),competitor_CIHigh=ci.high(competitor_look),center_prop=mean(center_look),center_CILow=ci.low(center_look),center_CIHigh=ci.high(center_look)) %>%  #,other_prop=mean(other_look),other_CILow=ci.low(other_look),other_CIHigh=ci.high(other_look)) %>% 
   ungroup() %>% 
@@ -371,30 +381,59 @@ long_ymax = agr %>%
 toplot = long_props %>%
  left_join(long_ymin,by=c("condition","size","binned_time_relative","region")) %>%
  left_join(long_ymax,by=c("condition","size","binned_time_relative","region")) %>%
- mutate(region = fct_relevel(region,"target","competitor","center"),determiner = fct_relevel(condition,"all","some"))
+  mutate(region = fct_recode(region,"residue"="center")) %>% 
+  mutate(region = fct_relevel(region,"target","competitor"),determiner = fct_relevel(condition,"all","some"))
 ```
 
-```{r fig2,  fig.height=8, fig.width=6}
+```{r fig2,  fig.height=3, fig.width=9}
 onsets = dd_binned %>% 
   summarize(gender=mean(gender_onset_ms)-1000,determiner=mean(determiner_onset_ms)-1000,name=mean(name_onset_ms)-1000,noun=mean(noun_onset_ms)-1000)
 windows = tibble(window=c("baseline","gender","determiner","name","noun"),x=c(400,1200,2000,2700,3200))
 vlinesize=.5
 
 ggplot(toplot, aes(x=binned_time_relative,y=proportion)) +
-  geom_line(size=1, aes(color=region,linetype=size)) +
-  geom_ribbon(aes(ymin=ymin,ymax=ymax,fill=region),alpha=.3) +
-  scale_color_manual(values=cbPalette[2:5]) +
-  scale_fill_manual(values=cbPalette[2:5]) +
+  geom_line(size=1, aes(color=determiner,linetype=size)) +
+  geom_ribbon(aes(ymin=ymin,ymax=ymax,fill=determiner,group=interaction(determiner,size)),alpha=.3) +
+  scale_fill_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
+  scale_color_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
   geom_vline(aes(xintercept=onsets$gender),size=vlinesize) +
   geom_vline(aes(xintercept=onsets$determiner),size=vlinesize) +
   geom_vline(aes(xintercept=onsets$name),size=vlinesize) +
   geom_vline(aes(xintercept=onsets$noun),size=vlinesize) +
-  geom_text(data=windows,aes(label=window,x=x),y=.78,size=2) +
-  xlab("Time in ms relative to target word onset") +
-  ylab("Proportion of looks") +
-  #geom_text(data=annotations,aes(label=Label)) +
-  facet_wrap(~determiner,nrow=3)
-ggsave("../graphs/prop_looks_condsize.pdf",height=8,width=6)
+  geom_text(data=windows,aes(label=window,x=x),y=.95,size=2.5) +
+  xlab("Time in ms relative to audio onset") +
+  ylab("Proportion of looks to region") +  
+  ylim(0,1) +
+  scale_x_continuous(breaks=seq(0,3600,by=400),minor_breaks = seq(200,3800,by=400)) +
+  facet_wrap(~region)
+ggsave("../graphs/prop_looks_condsize.pdf",width=9,height=3)
+
+# now only target and residue
+ttoplot = toplot %>% 
+  filter(region == "target" | region == "residue") %>% 
+  droplevels()
+
+ggplot(ttoplot, aes(x=binned_time_relative,y=proportion)) +
+  geom_line(size=1, aes(color=determiner,linetype=size)) +
+  geom_ribbon(aes(ymin=ymin,ymax=ymax,fill=determiner,group=interaction(determiner,size)),alpha=.3) +
+  scale_fill_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
+  scale_color_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
+  geom_vline(aes(xintercept=onsets$gender),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$determiner),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$name),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$noun),size=vlinesize) +
+  geom_text(data=windows,aes(label=window,x=x),y=.95,size=2.5) +
+  xlab("Time in ms relative to audio onset") +
+  ylab("Proportion of looks to region") + 
+  ylim(0,1) +
+  scale_x_continuous(breaks=seq(0,3600,by=400),minor_breaks = seq(200,3200,by=400),limits=c(0,3700)) +
+  facet_wrap(~region)
+ggsave("../graphs/proportions_condsize_withresidue_tr.pdf",width=9,height=3)
+
+# CONTINUE HERE WITH MAKING MODEL
+  
+m = glmer()
+
 ```
 
 
