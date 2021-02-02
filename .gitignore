@@ -27,4 +27,5 @@ papers/cogsci2020/si_context_rt.pdf
 *.fdb_latexmk
 *.fls
 *.log
+*.pdf
 *.synctex.gz
