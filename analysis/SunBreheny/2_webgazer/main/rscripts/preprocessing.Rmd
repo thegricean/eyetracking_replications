@@ -441,20 +441,22 @@ dd_subset = dd_binned %>%
 
 dd_determiner = dd_subset %>%
   filter(determiner_window==1) %>%
-  mutate(target_look=as.factor(target_look),size=as.factor(size),relative_time=as.factor(relative_time)) %>%
+  mutate(time_fct = relative_time/100) %>%
+  mutate(target_look=as.factor(target_look),size=as.factor(size),time_fct=as.factor(time_fct)) %>%
   mutate(csize=as.numeric(size)-mean(as.numeric(size))) %>%
-  mutate(crelative_time=as.numeric(relative_time)-mean(as.numeric(relative_time)))
+  mutate(ctime_fct=as.numeric(time_fct)-mean(as.numeric(time_fct)))
 
 dd_name = dd_subset %>%
   filter(name_window==1) %>%
-  mutate(target_look=as.factor(target_look),size=as.factor(size),relative_time=as.factor(relative_time)) %>%
+  mutate(time_fct = relative_time/100) %>%
+  mutate(target_look=as.factor(target_look),size=as.factor(size),time_fct=as.factor(time_fct)) %>%
   mutate(csize=as.numeric(size)-mean(as.numeric(size))) %>%
-  mutate(crelative_time=as.numeric(relative_time)-mean(as.numeric(relative_time)))
+  mutate(ctime_fct=as.numeric(time_fct)-mean(as.numeric(time_fct)))
 
-m.determiner = glmer(target_look ~ determiner*csize*crelative_time + (determiner*csize*crelative_time|workerid) + (1+determiner*csize*crelative_time|Noun), family="binomial",data=dd_determiner)
+m.determiner = glmer(target_look ~ determiner*csize*ctime_fct + (determiner*csize*ctime_fct|workerid) + (1+determiner*csize*ctime_fct|Noun), family="binomial",data=dd_determiner)
 summary(m.determiner)
 
-m.name = glmer(target_look ~ determiner*csize*crelative_time + (determiner*csize*crelative_time|workerid) + (1+determiner*csize*crelative_time|Noun), family="binomial",data=dd_name)
+m.name = glmer(target_look ~ determiner*csize*ctime_fct + (determiner*csize*ctime_fct|workerid) + (1+determiner*csize*ctime_fct|Noun), family="binomial",data=dd_name)
 summary(m.name)
 
 ```
