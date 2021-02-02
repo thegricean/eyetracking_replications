@@ -95,7 +95,6 @@ proportions
 
 ggsave(proportions, file="../graphs/proportions_order.pdf",width=9,height=9)
 
-
 # recreate Fig 13 from Sun & Breheny 2020
 # compute and then plot target preference scores in each window
 toplot =  df %>%
@@ -131,7 +130,6 @@ ggplot(toplot, aes(x=click_number, y=target, color=Condition, linetype=Size,grou
   ylab("log(P(Target)/P(Competitor))") #+
   # theme(axis.text.x=element_text(angle=30,hjust=1,vjust=1))
 ggsave("../graphs/results-idt.pdf",width=4.5,height=2.5)
-
 
 ### PART II: PLOT CATEGORICAL DATA AGAINST EYE MOVEMENT DATA
 
@@ -327,3 +325,30 @@ ggplot(toplot, aes(x=prop_selections, y=prop_looks)) +
         legend.box.margin=margin(-10,-10,-10,-10),legend.spacing.y = unit(0.001, 'cm'))#,legend.box.spacing = unit(0.01, 'cm'),) 
 # guides(fill=guide_legend(nrow=2,byrow=TRUE))
 ggsave("../graphs/correlations-bycondition.pdf",width=6,height=4)
+
+# proportion of looks to target & competitor
+gaze =  g %>%
+  filter(TrackLoss=="FALSE") %>%
+  select(Prime,condition,determiner,size,targetlook,competitorlook,residuelook,whichword,item) %>%
+  mutate(distractorlook=ifelse(targetlook=="1",0,ifelse(competitorlook=="1",0,ifelse(residuelook=="1",0,1)))) %>%
+  mutate(window=as.character(whichword)) %>%
+  mutate(window = ifelse(whichword =="determiner","determiner+name", ifelse(whichword=="name","determiner+name",ifelse(whichword=="end","noun",window)))) %>%
+  filter(targetlook == 1 | competitorlook == 1 | residuelook== 1) %>% #CHANGE
+  #filter(targetlook == 1 | competitorlook == 1) %>% #CHANGE
+  group_by(condition,size,window) %>%
+  summarize(Mean_target_look=mean(targetlook),Mean_competitor_look=mean(competitorlook),Mean_distractor_look=mean(distractorlook),target_ci_low=ci.low(targetlook),target_ci_high=ci.high(targetlook),competitor_ci_low=ci.low(competitorlook),competitor_ci_high=ci.high(competitorlook)) %>%
+  ungroup() %>%
+  #mutate(YMin=Mean_target_look-target_ci_low,YMax=Mean_target_look+target_ci_high) #%>%
+  mutate(YMin=Mean_competitor_look-competitor_ci_low,YMax=Mean_competitor_look+competitor_ci_high)
+  
+ggplot(gaze, aes(x=window, y=Mean_competitor_look, color=condition, linetype=size,group=interaction(condition,size))) +
+  geom_line(size=1.3,position=dodge) +
+  geom_point(size=2.5,shape="square",position=dodge) +
+  geom_errorbar(aes(ymin=YMin, ymax=YMax), width=.2, alpha=.7,  linetype="solid",position=dodge) +
+  #facet_grid(size ~condition ) + 
+  scale_color_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
+  scale_x_discrete(limits = c("baseline", "gender", "determiner+name","noun"))+
+  xlab("Window") +
+  ylab("Proportion of looks to competitor") #+
+# theme(axis.text.x=element_text(angle=30,hjust=1,vjust=1))
+ggsave("../graphs/results-competitor-with-residue.pdf",width=4.5,height=3)
