@@ -1,4 +1,5 @@
 library(tidyverse)
+library(lme4)
 
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 source("helpers.R")
@@ -529,3 +530,27 @@ ggplot(ttoplot, aes(x=ttime, y=proportion)) +
   scale_x_continuous(breaks=seq(0,4000,by=400),minor_breaks = seq(200,3800,by=400)) 
 # theme(axis.text.x=element_text(angle=30,hjust=1,vjust=1))
 ggsave("../graphs/proportions_condsize_target.pdf",width=5,height=3)
+
+# MODELS
+tomodel = g %>%
+  select(Prime,Subject,item,condition,determiner,size,time,targetlook,competitorlook,whichword) %>%
+  filter(targetlook == 1 | competitorlook == 1) 
+  
+determiner_window = tomodel %>%
+  filter(whichword=="determiner") %>%
+  mutate(targetlook=as.factor(targetlook),size=as.factor(size),time=as.factor(time)) %>%
+  mutate(csize=as.numeric(size)-mean(as.numeric(size))) %>%
+  mutate(ctime=as.numeric(time)-mean(as.numeric(time)))
+
+name_window = tomodel %>%
+  filter(whichword=="name") %>%
+  mutate(targetlook=as.factor(targetlook),size=as.factor(size),time=as.factor(time)) %>%
+  mutate(csize=as.numeric(size)-mean(as.numeric(size))) %>%
+  mutate(ctime=as.numeric(time)-mean(as.numeric(time)))
+
+m.determiner = glmer(targetlook ~ determiner*csize*ctime + (determiner*csize*ctime|Subject) + (1+determiner*csize*ctime|item), family="binomial",data=determiner_window)
+summary(m.determiner)
+
+m.name = glmer(targetlook ~ determiner*csize*ctime + (determiner*csize*ctime|Subject) + (1+determiner*csize*ctime|item), family="binomial",data=name_window)
+summary(m.name)
+

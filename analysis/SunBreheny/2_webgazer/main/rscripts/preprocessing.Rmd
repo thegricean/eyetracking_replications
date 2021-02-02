@@ -265,7 +265,7 @@ Bin samples and align time to the onset of words.
 tmp = dd
 dd = tmp %>% 
   filter(look!="other") %>% 
-  select(workerid,condition,size,list,slide_number,Name,Noun,click_onset_ms,gender_onset_ms,determiner_onset_ms,name_onset_ms,noun_onset_ms,look,target_look,competitor_look,center_look,webgazer_time,unixtlist,camview)
+  select(workerid,condition,size,determiner,list,slide_number,Name,Noun,click_onset_ms,gender_onset_ms,determiner_onset_ms,name_onset_ms,noun_onset_ms,look,target_look,competitor_look,center_look,webgazer_time,unixtlist,camview,click_onset_ms_200shift,gender_onset_ms_200shift,determiner_onset_ms_200shift,name_onset_ms_200shift,noun_onset_ms_200shift)
 
 first_samples = dd %>% 
   group_by(workerid,slide_number) %>% 
@@ -282,6 +282,7 @@ dd_binned = dd %>%
   left_join(first_samples,by=c("workerid","slide_number")) %>% 
   mutate(first_sample = as.numeric(first_sample)) %>% 
   mutate(relative_time = webgazer_time-first_sample) %>% 
+  mutate(relative_time_unix = unixtlist-first_unix) %>%
   mutate(time_rel_click_onset = relative_time - 1000 - click_onset_ms) %>% 
   mutate(time_rel_gender_onset = relative_time - 1000 - gender_onset_ms) %>% 
   mutate(time_rel_determiner_onset = relative_time - 1000 - determiner_onset_ms) %>% 
@@ -430,9 +431,31 @@ ggplot(ttoplot, aes(x=binned_time_relative,y=proportion)) +
   facet_wrap(~region)
 ggsave("../graphs/proportions_condsize_withresidue_tr.pdf",width=9,height=3)
 
-# CONTINUE HERE WITH MAKING MODEL
-  
-m = glmer()
+# CONTINUE HERE WITH MAKING MODEL 
+# subset of dd that has looks to either target or competitor and occurs in the determiner/name window 
+dd_subset = dd_binned %>%
+  select(workerid,condition,size,determiner,Name,Noun,webgazer_time,first_sample,relative_time,click_onset_ms_200shift,gender_onset_ms_200shift,determiner_onset_ms_200shift,name_onset_ms_200shift,noun_onset_ms_200shift,target_look,competitor_look) %>%
+  mutate(determiner_window = ifelse(1000+determiner_onset_ms_200shift<relative_time,ifelse(relative_time<1000+name_onset_ms_200shift,1,0),0)) %>%
+  mutate(name_window = ifelse(1000+name_onset_ms_200shift<relative_time,ifelse(relative_time<1000+noun_onset_ms_200shift,1,0),0)) %>%
+  filter(target_look == 1 | competitor_look == 1)
+
+dd_determiner = dd_subset %>%
+  filter(determiner_window==1) %>%
+  mutate(target_look=as.factor(target_look),size=as.factor(size),relative_time=as.factor(relative_time)) %>%
+  mutate(csize=as.numeric(size)-mean(as.numeric(size))) %>%
+  mutate(crelative_time=as.numeric(relative_time)-mean(as.numeric(relative_time)))
+
+dd_name = dd_subset %>%
+  filter(name_window==1) %>%
+  mutate(target_look=as.factor(target_look),size=as.factor(size),relative_time=as.factor(relative_time)) %>%
+  mutate(csize=as.numeric(size)-mean(as.numeric(size))) %>%
+  mutate(crelative_time=as.numeric(relative_time)-mean(as.numeric(relative_time)))
+
+m.determiner = glmer(target_look ~ determiner*csize*crelative_time + (determiner*csize*crelative_time|workerid) + (1+determiner*csize*crelative_time|Noun), family="binomial",data=dd_determiner)
+summary(m.determiner)
+
+m.name = glmer(target_look ~ determiner*csize*crelative_time + (determiner*csize*crelative_time|workerid) + (1+determiner*csize*crelative_time|Noun), family="binomial",data=dd_name)
+summary(m.name)
 
 ```
 
@@ -747,8 +770,8 @@ ggplot(toplot, aes(x=binned_time_relative,y=proportion)) +
 ggsave("../graphs/camview_analysis/prop_looks_condsize.pdf",height=8,width=6)
 ```
 
+```{r message=F, warning=F}
 
 
-
-
+```
 
