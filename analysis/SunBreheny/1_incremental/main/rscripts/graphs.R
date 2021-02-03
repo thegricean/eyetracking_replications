@@ -203,8 +203,8 @@ selection = s %>%
 
 gaze =  g %>%
   filter(TrackLoss=="FALSE") %>%
-  select(Prime,condition,determiner,size,targetlook,competitorlook,whichword,item) %>%
-  mutate(distractorlook=ifelse(targetlook=="1",0,ifelse(competitorlook=="1",0,1))) %>%
+  select(Prime,condition,determiner,size,targetlook,competitorlook,residuelook,whichword,item) %>%
+  mutate(distractorlook=ifelse(targetlook=="1",0,ifelse(competitorlook=="1",0,ifelse(residuelook=="1",0,1)))) %>%
   mutate(targetdistractorlook = ifelse(targetlook=="1",1,ifelse(distractorlook=="1",1,0))) %>%
   mutate(competitordistractorlook = ifelse(competitorlook=="1",1,ifelse(distractorlook=="1",1,0))) %>%
   mutate(window=as.character(whichword)) %>%
@@ -215,43 +215,9 @@ gaze =  g %>%
 df = merge(selection, gaze, by=c("determiner","size","window","item"))
 df$window_re<- factor(df$window, levels = c("baseline","gender","determiner+name","noun"))
 
-# target look & target selection
-target = ggplot(df, aes(x=Mean_target_selection, y=Mean_target_look)) +
-  geom_point(aes(color=window_re),size=2) +
-  geom_smooth(method='lm',size=1,color="grey26") +
-  xlim(0:1) +
-  ylim(0:1) +
-  coord_fixed()
-target
-cor(df$Mean_target_look,df$Mean_target_selection) # r=.9 (.99 if collapsing across)
+# CORRELATIONAL ANALYSES
 
-ggsave(target, file="../graphs/target.pdf",width=8,height=4)
-
-# competitor look & competitor selection
-competitor = ggplot(df, aes(x=Mean_competitor_selection, y=Mean_competitor_look)) +
-  geom_point(aes(color=window_re),size=2) +
-  geom_smooth(method='lm',size=1,color="grey26") +
-  xlim(0:1) +
-  ylim(0:1) +
-  coord_fixed()
-competitor
-cor(df$Mean_competitor_look,df$Mean_competitor_selection) # r=.67 (.86 if collapsing across conditions)
-
-ggsave(competitor, file="../graphs/competitor.pdf",width=8,height=4)
-
-# distractor look & distractor selection
-distractor = ggplot(df, aes(x=Mean_distractor_selection, y=Mean_distractor_look)) +
-  geom_point(aes(color=window_re),size=2) +
-  geom_smooth(method='lm',size=1,color="grey26") +
-  xlim(0:1) +
-  ylim(0:1) +
-  coord_fixed()
-distractor
-cor(df$Mean_distractor_look,df$Mean_distractor_selection) # r=.82 (.93 if collapsing across conditions)
-
-ggsave(distractor, file="../graphs/distractor.pdf",width=8,height=4)
-
-# plot all in same graph:
+# compute and visualize overall correlation
 longer_selections = df %>% 
   select(-Mean_target_look,-Mean_competitor_look,-Mean_distractor_look,-Mean_targetdistractor_look,-Mean_competitordistractor_look,-window_re) %>% 
   pivot_longer(cols=c("Mean_target_selection","Mean_competitor_selection","Mean_distractor_selection"),names_to=c("delete_this","Region","remove_this"),names_sep=c("_"),values_to="prop_selections") %>% 
@@ -269,7 +235,63 @@ toplot = longer_looks %>%
   droplevels()
 
 # overall correlation between eye movement and decision task data
-cor.test(toplot$prop_looks,toplot$prop_selections) # .64 (.69 if collapsing across conditions)
+cor.test(toplot$prop_looks,toplot$prop_selections) # .87
+
+# correlation between eye movement and decision task data separately by time window
+cors_window = toplot %>% 
+  group_by(window) %>% 
+  summarize(Correlation=round(cor.test(prop_selections,prop_looks)$estimate,2),P=round(cor.test(prop_selections,prop_looks)$p.value,5))
+cors_window # .57, .81, .91, .96
+
+ggplot(toplot, aes(x=prop_selections, y=prop_looks)) +
+  geom_point(size=2,aes(color=Region)) +
+  geom_smooth(method='lm',size=1,color="grey26",group=1) +
+  # geom_smooth(method='lm',size=1,aes(color=Region)) +
+  geom_abline(slope=1,linetype="dotted",color="gray40") +
+  geom_text(data=cors_window, aes(label=paste("r=",Correlation)), x=.5,y=.9) +
+  scale_color_manual(values=c(cbPalette[7],cbPalette[1],cbPalette[4],cbPalette[5])) +
+  labs(
+    # shape="Window",
+    # color="Window",
+    x="Proportion of selections (Exp. 1)",
+    y="Proportion of looks (S. & B., 2020)") +
+  xlim(0,1) +
+  ylim(0,1) +
+  # coord_fixed() +
+  facet_wrap(~window,nrow=1) +
+  theme(legend.position="top")
+ggsave("../graphs/corr-window.pdf",width=9,height=3)
+
+
+# collapsing across items
+agr = toplot %>% 
+  group_by(window,Region,determiner,size) %>% 
+  summarize(prop_selections = mean(prop_selections),prop_looks=mean(prop_looks))
+
+cors_window_it = agr %>% 
+  group_by(window) %>% 
+  summarize(Correlation=round(cor.test(prop_selections,prop_looks)$estimate,2),P=round(cor.test(prop_selections,prop_looks)$p.value,5))
+cors_window_it # .87, .98, .97, 1
+
+ggplot(agr, aes(x=prop_selections, y=prop_looks, group=1)) +
+  geom_point(size=2,aes(color=window)) +
+  geom_smooth(method='lm',size=1,color="grey26") +
+  geom_abline(slope=1,linetype="dotted",color="gray40") +
+  geom_text(data=cors_window_it, aes(label=paste("r=",Correlation)), x=.5,y=.9) +
+  scale_color_manual(values=c(cbPalette[7],cbPalette[1],cbPalette[4],cbPalette[5])) +
+  labs(
+    # shape="Window",
+    # color="Window",
+    x="Proportion of selections (Exp. 1)",
+    y="Proportion of looks (S. & B., 2020)") +
+  xlim(0,1) +
+  ylim(0,1) +
+  # coord_fixed() +
+  facet_wrap(~window) +
+  theme(legend.position="top")
+ggsave("../graphs/corr-window-coll.pdf",width=6,height=3)
+
+
 # correlation between eye movement and decision task data separately by region
 cors_reg = toplot %>% 
   group_by(Region) %>% 
@@ -324,7 +346,7 @@ ggplot(toplot, aes(x=prop_selections, y=prop_looks, group=1)) +
   theme(legend.position="top",
         legend.margin=margin(0,0,0,0),
         legend.box.margin=margin(-10,-10,-10,-10),legend.spacing.y = unit(0.001, 'cm'))#,legend.box.spacing = unit(0.01, 'cm'),) 
-  # guides(fill=guide_legend(nrow=2,byrow=TRUE))
+# guides(fill=guide_legend(nrow=2,byrow=TRUE))
 ggsave("../graphs/correlations-bycondition.pdf",width=6,height=4)
 
 # correlation between eye movement and decision task data separately by time window
@@ -359,6 +381,43 @@ ggplot(toplot, aes(x=prop_selections, y=prop_looks)) +
 # guides(fill=guide_legend(nrow=2,byrow=TRUE))
 ggsave("../graphs/correlations-bycondition.pdf",width=6,height=4)
 
+
+
+# target look & target selection
+target = ggplot(df, aes(x=Mean_target_selection, y=Mean_target_look)) +
+  geom_point(aes(color=window_re),size=2) +
+  geom_smooth(method='lm',size=1,color="grey26") +
+  xlim(0:1) +
+  ylim(0:1) +
+  coord_fixed()
+target
+cor(df$Mean_target_look,df$Mean_target_selection) # r=.9 (.99 if collapsing across)
+
+ggsave(target, file="../graphs/target.pdf",width=8,height=4)
+
+# competitor look & competitor selection
+competitor = ggplot(df, aes(x=Mean_competitor_selection, y=Mean_competitor_look)) +
+  geom_point(aes(color=window_re),size=2) +
+  geom_smooth(method='lm',size=1,color="grey26") +
+  xlim(0:1) +
+  ylim(0:1) +
+  coord_fixed()
+competitor
+cor(df$Mean_competitor_look,df$Mean_competitor_selection) # r=.67 (.86 if collapsing across conditions)
+
+ggsave(competitor, file="../graphs/competitor.pdf",width=8,height=4)
+
+# distractor look & distractor selection
+distractor = ggplot(df, aes(x=Mean_distractor_selection, y=Mean_distractor_look)) +
+  geom_point(aes(color=window_re),size=2) +
+  geom_smooth(method='lm',size=1,color="grey26") +
+  xlim(0:1) +
+  ylim(0:1) +
+  coord_fixed()
+distractor
+cor(df$Mean_distractor_look,df$Mean_distractor_selection) # r=.82 (.93 if collapsing across conditions)
+
+ggsave(distractor, file="../graphs/distractor.pdf",width=8,height=4)
 
 # PLOT PROPORTIONS OF LOOKS
 
