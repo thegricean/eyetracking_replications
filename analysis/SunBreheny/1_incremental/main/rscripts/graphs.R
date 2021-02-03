@@ -140,7 +140,7 @@ toplot =  df %>%
   gather(click_number,location,click1:click4) %>%
   mutate(target=ifelse(location==target1,1,ifelse(location==target2,1,0))) %>%
   mutate(competitor=ifelse(location==competitor1,1,ifelse(location==competitor2,1,0))) %>%
-  #filter(target == 1 | competitor == 1) %>% #CHANGE
+  filter(target == 1 | competitor == 1) %>% #CHANGE
   group_by(condition,size,click_number) %>%
   summarize(m_target=mean(target),m_competitor=mean(competitor),target_ci_low=ci.low(target),target_ci_high=ci.high(target),competitor_ci_low=ci.low(competitor),competitor_ci_high=ci.high(competitor)) %>% 
   ungroup() %>% 
@@ -157,11 +157,11 @@ ggplot(toplot, aes(x=click_number, y=m_target, color=Condition, linetype=Size,gr
   # facet_grid(size ~condition ) + 
   scale_color_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
   scale_x_discrete(breaks=c("click1","click2","click3","click4"),
-                   labels=c("Baseline", "Gender", "Determiner", "Noun")) +
+                   labels=c("baseline", "gender", "determiner", "noun")) +
   xlab("Window") +
   ylab("Proportion of target selections") #+
 # theme(axis.text.x=element_text(angle=30,hjust=1,vjust=1))
-ggsave("../graphs/results-target-all-looks.pdf",width=4.5,height=2.5)
+ggsave("../graphs/results-target.pdf",width=4.5,height=2.5)
 
 
 ### PART II: PLOT CATEGORICAL DATA AGAINST EYE MOVEMENT DATA
