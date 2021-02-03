@@ -28,6 +28,43 @@ df = df %>%
 
 df = separate(df,response,into=c("click1","click2","click3","click4"),sep=",")
 
+### EXCLUSIONS
+df = df %>%
+  mutate(selection_correct = ifelse(as.numeric(click4) == as.numeric(target1),1,ifelse(as.numeric(click4) == as.numeric(target2),1,0)))
+
+table(df$selection_correct) # 665 incorrect responses
+
+# exclude anyone with < 95% correct selections
+accuracy = df %>% 
+  filter(ExpFiller != "Prac") %>% 
+  group_by(workerid) %>% 
+  tally(selection_correct) %>% 
+  mutate(correct=n/48) 
+
+View(accuracy %>% arrange(n))
+
+toexclude = accuracy %>% 
+  filter(correct < .95)
+
+length(toexclude$workerid) # exclude 29 subjects
+length(toexclude$workerid)/length(accuracy$workerid) # exclude 24% of subjects
+
+df = df %>% 
+  filter(!workerid %in% toexclude$workerid)
+
+unique(demo$language) # no exlusions (some people left it blank?)
+
+# trials with incorrect selections
+df = df %>% 
+  filter(selection_correct==1)
+
+nrow(df) # 4348
+
+# get only experimental trials (no fillers) for further analysis
+df = df %>% 
+  filter(ExpFiller=="Exp") %>%
+  droplevels()
+
 ### PART I: PLOT DATA FROM REPLICATION TASK
 
 # plot proportion of selections by condition
