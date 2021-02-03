@@ -132,6 +132,38 @@ ggplot(toplot, aes(x=click_number, y=target, color=Condition, linetype=Size,grou
   # theme(axis.text.x=element_text(angle=30,hjust=1,vjust=1))
 ggsave("../graphs/results-idt.pdf",width=4.5,height=2.5)
 
+#Leyla new plots
+toplot =  df %>%
+  filter(ExpFiller=="Exp") %>%
+  select(workerid,condition,size,click1,click2,click3,click4,target1,target2,competitor1,competitor2,instruction3) %>%
+  mutate(ID = row_number()) %>%
+  gather(click_number,location,click1:click4) %>%
+  mutate(target=ifelse(location==target1,1,ifelse(location==target2,1,0))) %>%
+  mutate(competitor=ifelse(location==competitor1,1,ifelse(location==competitor2,1,0))) %>%
+  #filter(target == 1 | competitor == 1) %>% #CHANGE
+  group_by(condition,size,click_number) %>%
+  summarize(m_target=mean(target),m_competitor=mean(competitor),target_ci_low=ci.low(target),target_ci_high=ci.high(target),competitor_ci_low=ci.low(competitor),competitor_ci_high=ci.high(competitor)) %>% 
+  ungroup() %>% 
+  mutate(YMin=m_target-target_ci_low,YMax=m_target+target_ci_high) %>% 
+  #mutate(YMin=m_competitor-competitor_ci_low,YMax=m_competitor+competitor_ci_high) %>% 
+  mutate(Condition=fct_relevel(condition,"all","some"),Size=size) %>%
+  mutate(Condition=fct_recode(Condition,"number"="num"))
+dodge=position_dodge(0)
+
+ggplot(toplot, aes(x=click_number, y=m_target, color=Condition, linetype=Size,group=interaction(Condition,Size))) +
+  geom_line(size=1.3,position=dodge) +
+  geom_point(size=2.5,shape="square",position=dodge) +
+  geom_errorbar(aes(ymin=YMin, ymax=YMax), width=.2, alpha=.7,  linetype="solid",position=dodge) +
+  # facet_grid(size ~condition ) + 
+  scale_color_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
+  scale_x_discrete(breaks=c("click1","click2","click3","click4"),
+                   labels=c("Baseline", "Gender", "Determiner", "Noun")) +
+  xlab("Window") +
+  ylab("Proportion of target selections") #+
+# theme(axis.text.x=element_text(angle=30,hjust=1,vjust=1))
+ggsave("../graphs/results-target-all-looks.pdf",width=4.5,height=2.5)
+
+
 ### PART II: PLOT CATEGORICAL DATA AGAINST EYE MOVEMENT DATA
 
 # load eye-tracking data from Sun&Breheny ---> not sure about these variables: TrialId, mean, subject, unique,TETTime, RTTime, time
