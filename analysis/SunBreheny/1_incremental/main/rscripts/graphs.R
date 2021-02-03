@@ -258,9 +258,8 @@ ggplot(toplot, aes(x=prop_selections, y=prop_looks)) +
   xlim(0,1) +
   ylim(0,1) +
   # coord_fixed() +
-  facet_wrap(~window,nrow=1) +
-  theme(legend.position="top")
-ggsave("../graphs/corr-window.pdf",width=9,height=3)
+  facet_wrap(~window,nrow=1) 
+ggsave("../graphs/corr-window.pdf",width=10,height=2.5)
 
 
 # collapsing across items
@@ -292,47 +291,91 @@ ggplot(agr, aes(x=prop_selections, y=prop_looks, group=1)) +
 ggsave("../graphs/corr-window-coll.pdf",width=6,height=3)
 
 
+
+# correlation between eye movement and decision task data separately by condition within determiner window
+cors_determiner = toplot %>% 
+  filter(window == "determiner+name") %>% 
+  group_by(determiner, size) %>% 
+  summarize(Correlation=round(cor.test(prop_selections,prop_looks)$estimate,2),P=round(cor.test(prop_selections,prop_looks)$p.value,5))
+cors_determiner
+
+# determiner size  Correlation     P
+# <fct>      <chr>       <dbl> <dbl>
+# 1 all        big          0.94     0
+# 2 all        small        0.87     0
+# 3 some       big          0.88     0
+# 4 some       small        0.82     0
+# 5 number     big          0.95     0
+# 6 number     small        0.96     0
+
+ggplot(toplot %>% filter(window == "determiner+name"), aes(x=prop_selections, y=prop_looks)) +
+  geom_point(size=2,aes(color=Region,alpha=size)) +
+  geom_smooth(method='lm',size=1,color="grey26",group=1) +
+  # geom_smooth(method='lm',size=1) +
+  geom_abline(slope=1,linetype="dotted",color="gray40") +
+  geom_text(data=cors_determiner, aes(label=paste("r=",Correlation),alpha=size), x=c(.3,.7,.3,.7,.3,.7),y=.9, show.legend = FALSE) +
+  scale_color_manual(values=c(cbPalette[7],cbPalette[1],cbPalette[4],cbPalette[5])) +
+  scale_alpha_manual(values=c(.9,.3)) +
+  labs(
+    size="Set size",
+    color="Region",
+    x="Proportion of selections (Exp. 1)",
+    y="Proportion of looks (S. & B., 2020)") +
+  xlim(0,1) +
+  ylim(0,1) +
+  # coord_fixed() +
+  facet_wrap(~determiner,nrow=1) +
+  theme(legend.position="top",
+        legend.margin=margin(0,0,0,0),
+        legend.box.margin=margin(-10,-10,-10,-10),legend.spacing.y = unit(0.001, 'cm'))
+ggsave("../graphs/corr-determiner.pdf",width=6,height=2.5)
+
+
+# collapsing across items
+agr = toplot %>% 
+  filter(window == "determiner+name") %>% 
+  group_by(window,Region,determiner,size) %>% 
+  summarize(prop_selections = mean(prop_selections),prop_looks=mean(prop_looks))
+
+cors_determiner_it = agr %>% 
+  group_by(determiner, size) %>% 
+  summarize(Correlation=round(cor.test(prop_selections,prop_looks)$estimate,2),P=round(cor.test(prop_selections,prop_looks)$p.value,5))
+cors_determiner_it # all close to 1 but p > .05 (too few data points)
+
+
+
 # correlation between eye movement and decision task data separately by region
 cors_reg = toplot %>% 
   group_by(Region) %>% 
   summarize(Correlation=round(cor.test(prop_selections,prop_looks)$estimate,2),P=round(cor.test(prop_selections,prop_looks)$p.value,5))
-cors_reg # .9, .68, .82 (collapsing across conditions: .99, .86, .93)
-# correlation between eye movement and decision task data separately by condition
-cors = toplot %>% 
-  group_by(determiner, size) %>% 
-  summarize(Correlation=round(cor.test(prop_selections,prop_looks)$estimate,2),P=round(cor.test(prop_selections,prop_looks)$p.value,5))
-cors # n=864
-# determiner size  Correlation    Collapsed:
-# <fct>      <chr>       <dbl>
-# 1 all        big          0.70  .74
-# 2 all        small        0.57  .63
-# 3 some       big          0.59  .63
-# 4 some       small        0.54  .59
-# 5 number     big          0.71  .75
-# 6 number     small        0.67  .75
+cors_reg # .9, .68, .73 
 
 ggplot(toplot, aes(x=prop_selections, y=prop_looks, group=1)) +
-  geom_point(size=2,aes(color=window,shape=window)) +
+  geom_point(size=2,aes(color=Region,shape=window)) +
   geom_smooth(method='lm',size=1,color="grey26") +
   geom_abline(slope=1,linetype="dotted",color="gray40") +
   geom_text(data=cors_reg, aes(label=paste("r=",Correlation)), x=.5,y=.9) +
   scale_color_manual(values=c(cbPalette[7],cbPalette[1],cbPalette[4],cbPalette[5])) +
   labs(shape="Window",
-       color="Window",
+       color="Region",
        x="Proportion of selections (Exp. 1)",
        y="Proportion of looks (S. & B., 2020)") +
   xlim(0,1) +
   ylim(0,1) +
   # coord_fixed() +
   facet_wrap(~Region) +
-  theme(legend.position="top")
-ggsave("../graphs/correlations-byregion.pdf",width=6,height=3)
+  guides(color = FALSE) +
+  theme(legend.position="top",
+        legend.margin=margin(0,0,0,0),
+        legend.box.margin=margin(-10,-10,-10,-10),legend.spacing.y = unit(0.001, 'cm'))
+ggsave("../graphs/corr-region.pdf",width=6,height=2.5)
 
+# other plots: full by-condition plot
 ggplot(toplot, aes(x=prop_selections, y=prop_looks, group=1)) +
   geom_point(size=2,aes(color=window,shape=Region),alpha=.7) +
   geom_smooth(method='lm',size=1,color="grey26") +
   geom_abline(slope=1,linetype="dotted",color="gray40") +
-  geom_text(data=cors, aes(label=paste("r=",Correlation)), x=.2,y=.9) +
+  # geom_text(data=cors, aes(label=paste("r=",Correlation)), x=.2,y=.9) +
   scale_color_manual(values=c(cbPalette[4],cbPalette[1],cbPalette[5],cbPalette[7])) +
   labs(shape="Region",
        color="Window",
@@ -349,75 +392,58 @@ ggplot(toplot, aes(x=prop_selections, y=prop_looks, group=1)) +
 # guides(fill=guide_legend(nrow=2,byrow=TRUE))
 ggsave("../graphs/correlations-bycondition.pdf",width=6,height=4)
 
-# correlation between eye movement and decision task data separately by time window
-cors_window = toplot %>% 
-  group_by(window) %>% 
-  summarize(Correlation=round(cor.test(prop_selections,prop_looks)$estimate,2),P=round(cor.test(prop_selections,prop_looks)$p.value,5))
-cors_window # n=864
+toplot$cprop_selections = toplot$prop_selections - mean(toplot$prop_selections)
 
-cors_window_region = toplot %>% 
-  group_by(window,Region) %>% 
-  summarize(Correlation=round(cor.test(prop_selections,prop_looks)$estimate,2),P=round(cor.test(prop_selections,prop_looks)$p.value,5))
-cors_window_region # n=864
 
-ggplot(toplot, aes(x=prop_selections, y=prop_looks)) +
-  geom_point(size=2,alpha=.7,aes(color=Region)) +
-  geom_smooth(method='lm',size=1,aes(color=Region)) +
-  geom_abline(slope=1,linetype="dotted",color="gray40") +
-  geom_text(data=cors_window, aes(label=paste("r=",Correlation)), x=.2,y=.9) +
-  facet_wrap(~window) +
-  # scale_color_manual(values=c(cbPalette[4],cbPalette[1],cbPalette[5],cbPalette[7])) +
-  labs(shape="Determiner",
-       color="Size",
-       x="Proportion of selections (Exp. 1)",
-       y="Proportion of looks (S. & B., 2020)") +
-  xlim(0,1) +
-  ylim(0,1) +
-  # coord_fixed() +
-  theme(legend.direction = "horizontal", legend.box = "vertical") +
-  theme(legend.position="top",
-        legend.margin=margin(0,0,0,0),
-        legend.box.margin=margin(-10,-10,-10,-10),legend.spacing.y = unit(0.001, 'cm'))#,legend.box.spacing = unit(0.01, 'cm'),) 
-# guides(fill=guide_legend(nrow=2,byrow=TRUE))
-ggsave("../graphs/correlations-bycondition.pdf",width=6,height=4)
+# model summary: 
+# - big main effect of explicit beliefs
+# - effect of explicit beliefs doesn't vary by window or region, except: beliefs have much smaller explanatory power for distractor looks
+# NOT IMPORTANT: - overall fewer looks to distractor in all windows except baseline (interactions with window); overall fewer looks to competitor in noun window
+contrasts(toplot$window)
+contrasts(toplot$window) = cbind("det.to.baseline"=c(1,0,0,0),"det.to.gender"=c(0,1,0,0),"det.to.noun"=c(0,0,0,1))
+
+m = lmer(prop_looks ~ cprop_selections*window*Region + (1+cprop_selections*window*Region|item), data=toplot)
+summary(m)
+
+#cogsci paper model:
+m = lm(prop_looks ~ cprop_selections + cprop_selections:window + cprop_selections:Region, data=toplot)
+summary(m)
+
+# adding interactions with experimental conditions of interest also doesn't change anything
+m = lm(prop_looks ~ cprop_selections + cprop_selections:window + cprop_selections:Region+ cprop_selections:determiner + cprop_selections:size, data=toplot)
+summary(m)
 
 
 
-# target look & target selection
-target = ggplot(df, aes(x=Mean_target_selection, y=Mean_target_look)) +
-  geom_point(aes(color=window_re),size=2) +
-  geom_smooth(method='lm',size=1,color="grey26") +
-  xlim(0:1) +
-  ylim(0:1) +
-  coord_fixed()
-target
-cor(df$Mean_target_look,df$Mean_target_selection) # r=.9 (.99 if collapsing across)
+# submodels for each window
+d_baseline = toplot %>% 
+  filter(window == "baseline") %>% 
+  mutate(cprop_selections = prop_selections - mean(prop_selections))
 
-ggsave(target, file="../graphs/target.pdf",width=8,height=4)
+m.baseline = lm(prop_looks ~ cprop_selections*Region, data=d_baseline)
+summary(m.baseline)
 
-# competitor look & competitor selection
-competitor = ggplot(df, aes(x=Mean_competitor_selection, y=Mean_competitor_look)) +
-  geom_point(aes(color=window_re),size=2) +
-  geom_smooth(method='lm',size=1,color="grey26") +
-  xlim(0:1) +
-  ylim(0:1) +
-  coord_fixed()
-competitor
-cor(df$Mean_competitor_look,df$Mean_competitor_selection) # r=.67 (.86 if collapsing across conditions)
+d_gender = toplot %>% 
+  filter(window == "gender") %>% 
+  mutate(cprop_selections = prop_selections - mean(prop_selections))
 
-ggsave(competitor, file="../graphs/competitor.pdf",width=8,height=4)
+m.gender = lm(prop_looks ~ cprop_selections*Region, data=d_gender)
+summary(m.gender)
 
-# distractor look & distractor selection
-distractor = ggplot(df, aes(x=Mean_distractor_selection, y=Mean_distractor_look)) +
-  geom_point(aes(color=window_re),size=2) +
-  geom_smooth(method='lm',size=1,color="grey26") +
-  xlim(0:1) +
-  ylim(0:1) +
-  coord_fixed()
-distractor
-cor(df$Mean_distractor_look,df$Mean_distractor_selection) # r=.82 (.93 if collapsing across conditions)
+d_det = toplot %>% 
+  filter(window == "determiner+name") %>% 
+  mutate(cprop_selections = prop_selections - mean(prop_selections))
 
-ggsave(distractor, file="../graphs/distractor.pdf",width=8,height=4)
+m.det = lm(prop_looks ~ cprop_selections*Region, data=d_det)
+summary(m.det)
+
+d_noun = toplot %>% 
+  filter(window == "noun") %>% 
+  mutate(cprop_selections = prop_selections - mean(prop_selections))
+
+m.noun = lm(prop_looks ~ cprop_selections*Region, data=d_noun)
+summary(m.noun)
+
 
 # PLOT PROPORTIONS OF LOOKS
 
