@@ -230,7 +230,7 @@ Having replicated SB2020's main findings in an incremental decision task, we inv
 
 \subsection{Results}
 
-\figref{fig:results-original} shows proportions of looks 
+\figref{fig:results-original} (bottom) shows proportions of looks to target in each condition (computed out of target, competitor, and residue looks in 100ms time bins). As is immediately evident, the results display striking dissimilarities to SB2020: in particular, all curves are flatter, i.e., looks to the target increase more slowly than in the original study. 
 
 We conducted separate mixed-effects logistic regressions in the 2 time windows of interest (determiner, name), predicting target over competitor looks from fixed effects of time (scaled and mean-centered), determiner (reference level: `number'), centered size (higher value: `big'), and their interactions. The random effects structure included by-item and by-participant random intercepts and slopes for all the fixed effects.
 
@@ -275,36 +275,32 @@ time & + &  ? & NA & $\cdot$ & + \\
 \label{tab:replication}
 \end{table}
 
-\textbf{Comparison with SB2020: replication analysis}. An overview of the effects reported by SB2020 and the effects observed in our Exps.~1 and 2 is shown in \tableref{tab:replication}. Most of the effects reported by SB2020 as first emerging in the determiner window did not emerge until the name window replicated:
+\textbf{Comparison with SB2020: replication analysis}. An overview of the effects reported by SB2020 and the effects observed in our Exps.~1 and 2 is shown in \tableref{tab:replication}. Most of the effects reported by SB2020 as first emerging in the determiner window did not emerge until the name window (about 700ms later). Of these, however, most replicated.
 
 \section{General discussion}
 
-\begin{itemize}
-	\item main point: in contrast to previous re-analysis of leffel et al, clear support for the Referential Belief link. reasons? 
-	\begin{itemize}
-		\item most likely: participants in SB expected the observed language (see preliminary production results from Qing et al, but also Kreiss and Degen 2020 results, plus tons of other literature supporting tight link between production and comprehension in general, and importance of clearly nameable items (ie, clear production expectations) for VW eye-tracking in particular (go back to mike's papers from the oughts)
-		\item possibly more power in SB than Leffel
-	\end{itemize}
-	\item pick the residue set issue back up -- possible extensions of Referential Belief link?
-	\item linking function issue is a problem not just with eye-tracking but with experimental measures in xprag in general (see eg the tvjt literature, though there have been several recent attempts to be explicit abt link, especially with the advent of probabilisitc models that make specifying a clear link easier): \cite{Jasbi2019, WaldonDegen2020, franke2014typical, savinelli2018, franke2016link, scholler2017semantic, tessler2019language}
-	\item methodological points:
-		\begin{itemize}
-			\item further validation of incermental decision task as useful measure of comprehension
-			\item The additional replication suggests that web-based eye-tracking using the WebGazer.js library is a) feasible; and b) a faster, cheaper way to collect eye movement data despite the added noise.
-		\end{itemize}
+The contributions of this work are three-fold: first, we report two replications---one in an incremental decision task and one in a novel web-based eye-tracking paradigm---of \citeA{sun2020}'s result that there is more uncertainty regarding the intended target for the quantifiers \emph{all} and \emph{some} than for numbers; and that this uncertainty is modulated by set size such that \emph{all} is associated with larger sets (3 objects) and \emph{some}, if anything, with smaller ones (2 objects). 
+
+Second, and in  contrast to a previous re-analysis of an experimental pragmatics eye-tracking dataset \cite{QingLD2018}, the current re-analysis offers clear support for the Referential Belief link.  We believe this difference is most likely the result of participants in SB2020's study having much greater expectations for the observed language, though this requires further investigation. %Further support for this explanation comes from \citeA{kreiss2020}, who found that the size of contrastive inferences is robustly predicted by empirically elicited production expectations.  (see preliminary production results from Qing et al, but also Kreiss and Degen 2020 results, plus tons of other literature supporting tight link between production and comprehension in general, and importance of clearly nameable items (ie, clear production expectations) for VW eye-tracking in particular (go back to mike's papers from the oughts) 
+The Referential Belief link does not capture that participants' looks to regions in a display are not just guided by their belief that a region contains the target, but can be subject to other attentional processes \cite{Allopenna1998}. A fuller linking theory must integrate such processes.
+
+
+Finally, we show that web-based eye-tracking  may provide a useful way to collect eye-tracking data for psycholinguistic research. The latency of the observed effects indicates we are some way from being able to conduct the gamut of eye-tracking experiments that require fine-grained, time-sensitive data remotely. Designs requiring multiple regions of interest (e.g., a four-image display as in Exp.~3) or subtle discrimination between stimuli (as in a reading task) may fare particularly badly given the added noise, especially if effects are subtle. However, our results do show signal amongst this noise, and web-based eye-tracking may be particularly fruitful for studies that do not require precise timing information about the onset of an effect. 
+
+Much more investigation is needed into whether different methodological and implementation decisions might yield more reliable results. Two-image displays that allow for greater distance between the regions of interest may reduce noise, for example, but validation through replication of existing work is needed. More rigorous and frequent accuracy checks throughout the task may also improve the clarity of the resulting data: in Exp.~3, participants completed an initial calibration and accuracy check, and were able to proceed if they scored above 50\%. Given the novelty of the medium, we do not know whether increasing this threshold might decrease noise, or whether additional, continuous accuracy checks analogous to standard drift correction practices might better ensure that participants' eye movements are being reliably recorded.
+%
+% STUFF TO PUT IN FOR CAMERA-READY
+% linking function issue is a problem not just with eye-tracking but with experimental measures in xprag in general (see eg the tvjt literature, though there have been several recent attempts to be explicit abt link, especially with the advent of probabilisitc models that make specifying a clear link easier): \cite{Jasbi2019, WaldonDegen2020, franke2014typical, savinelli2018, franke2016link, scholler2017semantic, tessler2019language}
+%	\item methodological points:
+%		\begin{itemize}
+%			\item further validation of incermental decision task as useful measure of comprehension
+%			\item The additional replication suggests that web-based eye-tracking using the WebGazer.js library is a) feasible; and b) a faster, cheaper way to collect eye movement data despite the added noise.
+%		\end{itemize}
 		
-The latency of these effects indicate we are some way from being able to conduct the gamut of eye-tracking experiments that require fine-grained, time-sensitive data remotely. Designs requiring multiple regions of interest (e.g., a four-image display as in Exp. 3) or subtle discrimination between stimuli (as in a reading task) may fare particularly badly given the added noise, especially if effects are subtle. However, our results do show signal amongst this noise, and web-based eye-tracking may be particularly fruitful for studies that do not require precise timing information about the onset of an effect. 
 
-Much more investigation is needed into whether different methodological and implementation decisions might yield more reliable results. Two-image displays that allow for greater distance between the regions of interest may reduce noise, for example, but validation through replication of existing work is needed. More rigorous and frequent accuracy checks throughout the task may also improve the clarity of the resulting data: in Exp. 3, participants completed an initial calibration and accuracy check, and were able to proceed if they scored above 50\%. Given the novelty of the medium, we do not know whether increasing this threshold might increase clarity, or whether additional accuracy checks might better ensure that participants' eye movements were still being tracked as reliably as possible. 
 
-	\item theoretical connection: more fine-grained RSA story that can capture the pref for small over big "some" despite "some" being bad for both; goes beyond (against?) the simple (SB and degen tanenhaus 2015/2016) production expectation story that only takes into account the probability of "some" being used for the bigger vs the smaller set. if we apply RSA, where what matters to interpretation is not just the relative probability of "some" being used for one vs the other set size, but it also matters how likely "all" and other alternatives are for the set sizes under consideration, then I think this result is expected as long as we assume that "all" is generally highly dispreferred for the small set and highly preferred for the big set. see example numbers below (assuming a uniform prior), where S is the pragmatic speaker and L is the pragmatic listener:
-\end{itemize}
-
-\jd{daisy's para:}
-
-The latency of these effects indicate we are some way from being able to conduct the gamut of eye-tracking experiments that require fine-grained, time-sensitive data remotely. Designs requiring multiple regions of interest (e.g., a four-image display as in Exp. 3) or subtle discrimination between stimuli (as in a reading task) may fare particularly badly given the added noise, especially if effects are subtle. However, our results do show signal amongst this noise, and web-based eye-tracking may be particularly fruitful for studies that do not require precise timing information about the onset of an effect. 
-
-Much more investigation is needed into whether different methodological and implementation decisions might yield more reliable results. Two-image displays that allow for greater distance between the regions of interest may reduce noise, for example, but validation through replication of existing work is needed. More rigorous and frequent accuracy checks throughout the task may also improve the clarity of the resulting data: in Exp. 3, participants completed an initial calibration and accuracy check, and were able to proceed if they scored above 50\%. Given the novelty of the medium, we do not know whether increasing this threshold might increase clarity, or whether additional accuracy checks might better ensure that participants' eye movements were still being tracked as reliably as possible. 
+%	\item theoretical connection: more fine-grained RSA story that can capture the pref for small over big "some" despite "some" being bad for both; goes beyond (against?) the simple (SB and degen tanenhaus 2015/2016) production expectation story that only takes into account the probability of "some" being used for the bigger vs the smaller set. if we apply RSA, where what matters to interpretation is not just the relative probability of "some" being used for one vs the other set size, but it also matters how likely "all" and other alternatives are for the set sizes under consideration, then I think this result is expected as long as we assume that "all" is generally highly dispreferred for the small set and highly preferred for the big set. see example numbers below (assuming a uniform prior), where S is the pragmatic speaker and L is the pragmatic listener:
+%\end{itemize}
 
 
 %Hypothetical speaker distribution for small set:
@@ -346,7 +342,7 @@ Much more investigation is needed into whether different methodological and impl
 %L(big|"three") = 1
 %\end{eqnarray*}
 
-\dots of course this all just captures the categorical belief data and can't handle verification (eg looks to residue set) at all; must bridge to algorithmic level
+
 
 %\begin{table}[H]
 %\begin{center} 
