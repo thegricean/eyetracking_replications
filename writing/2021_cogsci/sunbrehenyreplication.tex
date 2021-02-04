@@ -42,6 +42,12 @@
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{xcolor}
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    urlcolor={blue!80!black}
+}
 
 \newcommand{\tableref}[1]{Table~\ref{#1}}
 \newcommand{\figref}[1]{Figure~\ref{#1}}
@@ -148,7 +154,7 @@ In order to measure participants' beliefs about the intended referent at points 
 
 \subsection{Methods}
 
-\textbf{Participants.} We recruited 120 participants on Mechanical Turk, excluding participants with $<$ 95\% accuracy (n=29) and trials on which participants selected the wrong referent in the last window (665 trials). All participants were self-reported native English speakers.\footnote{Procedure, materials, analyses and exclusions were pre-registered at https://osf.io/vfgc8/?view\_only=ad72b307653e4e02921b7173f9013\hspace{3pt}da6 (Exp.~1) and https://osf.io/y2cgb/?view\_only=8acea9210ef6488b\hspace{3pt}8707e1aa7d47a53e (Exp.~2). The collected sample size for Exp.~2 (183 participants) was larger than the originally pre-registered sample size (102 participants) because 40\% of the initially tested 102 participants had a technical issue and weren't able to see the whole display.}
+\textbf{Participants.} We recruited 120 participants on Mechanical Turk, excluding participants with $<$ 95\% accuracy (n=29) and trials on which participants selected the wrong referent in the last window (665 trials). All participants were self-reported native English speakers.\footnote{Procedure, materials, analyses and exclusions were pre-registered at \href{https://osf.io/vfgc8?view_only=ad72b307653e4e02921b7173f9013da6}{\url{https://osf.io/vfgc8?view_only=ad72b307653e4e02921b7173f9013da6}} (Exp.~1) and \href{https://osf.io/y2cgb/?view_only=8acea9210ef6488b8707e1aa7d47a53e}{\url{https://osf.io/y2cgb/?view_only=8acea9210ef6488b8707e1aa7d47a53e}} (Exp.~2). The collected sample size for Exp.~2 (183 participants) was larger than the originally pre-registered sample size (102 participants) because 40\% of the initially tested 102 participants had a technical issue and weren't able to see the whole display.}
 
 \textbf{Materials and procedure.} We measured participants' beliefs about the intended referent for each display shown to participants by SB2020 (see \figref{fig:display} for examples). Participants were told that they were playing a guessing game, and whenever they made a guess, more words would appear. The critical sentences of the form ``Click on the GENDER who has DETERMINER  of NAME's NOUN" were revealed incrementally. GENDER was one of \emph{boy/girl}, DETERMINER was one of \emph{some/all/two/three}, NAME was one of \emph{Susan/Amy/Michael}, and NOUN was one of \emph{apples/bananas/erasers/scissors/knives/rulers/forks/plates/
 spoons/pencils/pears/oranges}.  Participants clicked on the presumed target after (a) ``Click on the" (baseline window), (b) ``GENDER that has" (gender window), (c) ``DETERMINER of NAME's" (determiner window), and (d) ``NOUN" (noun window). After each click, the next word(s) or display was shown. After 6 practice trials, each participant saw 48 experimental trials, of which 12 were filler trials with the number terms \emph{one} and \emph{four}. The 36 critical trials implemented SB2020's 2 (big vs.~small target set) by 3 (\emph{all, some}, number) design. 
