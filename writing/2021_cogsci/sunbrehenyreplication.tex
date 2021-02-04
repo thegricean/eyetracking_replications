@@ -63,8 +63,11 @@
 
 \definecolor{Red}{RGB}{180,20,140}
 \definecolor{Blue}{RGB}{0,0,255}
+\definecolor{Orange}{RGB}{220,135,0}
+
 \newcommand{\jd}[1]{\textcolor{Red}{\textbf{[jd: #1]}}} 
 \newcommand{\lk}[1]{\textcolor{Blue}{\textbf{[lk: #1]}}} 
+\newcommand{\dl}[1]{\textcolor{Orange}{\textbf{[dl: #1]}}} 
 
 \title{Seeing is believing: testing an explicit linking assumption for visual world eye-tracking in psycholinguistics} 
  
@@ -85,6 +88,8 @@
 
 
 \begin{abstract}
+Experimental investigation is fundamental to theory-building in cognitive science, but its value depends on the \emph{linking assumption}: the assumption made by researchers about the mapping between empirical measurements and theoretical explanations. %Empirical data only inform theories if the linking assumption is sufficiently clear and justified. 
+We argue that sufficient clarity and justification are often lacking for linking assumptions made in \emph{visual world eye-tracking}, a widely used experimental method in psycholinguistic research. We highlight the successes of this method within experimental pragmatics, which suffers particularly acutely from a lack of clear and justified linking assumptions. We then test what we term the \emph{Referential Belief} linking assumption: that the proportion of looks to a referent in a time window reflects participants' degree of belief that the referent is the intended target in that time window. We do so by eye-tracking data against explicit beliefs: in \expref{1}, we test an existing dataset on scalar implicature processing \cite<\expref{3} of>{sun2020} against explicit beliefs we collected in an incremental decision task. In \expref{2}, we replicate \citeA{sun2020} in a web-based eye-tracking paradigm using \texttt{WebGazer.js}. 
 
 \jd{write}
 
@@ -93,9 +98,10 @@ psycholinguistics; experimental pragmatics;  scalar implicature; linking functio
 \end{abstract}
 
 
-\section{Introduction}
+\dl{commenting  intro but leaving here in case parts are needed}
+%\section{Introduction}
 
-Experimental investigation is integral to scientific inquiry in cognitive science, and experimental data has informed cognitive theory-building for centuries. A fundamental ingredient in  using empirical data to put theories to the test is the assumption made by researchers about the mapping between theoretical notions and empirical measurements: the \emph{linking assumption}. Indeed, empirical measurements are only informative if the  linking assumption is (sufficiently) clear and justified. We argue that both clarity and justification are often lacking for linking assumptions made in \emph{visual world eye-tracking}, a widely used experimental method in psycholinguistic research. We highlight the role that visual world eye-tracking has played in the burgeoning field of experimental pragmatics, which suffers particularly acutely from a lack of clear and justified linking assumptions. We then test a (usually implicitly) made linking assumption for referential tasks, which we term the \emph{Referential Belief} linking assumption: that the proportion of looks to a referent in a time window reflects participants' degree of belief that the referent is the intended target in that time window. To do so, we compare eye movement data against explicit beliefs collected in an incremental decision task. We make use of a previously collected eye movement dataset on scalar implicature processing \cite<\expref{3} of>{sun2020}. In \expref{1} we collect explicit beliefs to test against \citeA{sun2020}'s eye movement data. In \expref{2}, we replicate  \citeA{sun2020} in a web-based eye-tracking paradigm using \texttt{WebGazer.js}. 
+%Experimental investigation is integral to scientific inquiry in cognitive science, and experimental data has informed cognitive theory-building for centuries. A fundamental ingredient in  using empirical data to put theories to the test is the assumption made by researchers about the mapping between theoretical notions and empirical measurements: the \emph{linking assumption}. Indeed, empirical measurements are only informative if the  linking assumption is (sufficiently) clear and justified. We argue that both clarity and justification are often lacking for linking assumptions made in \emph{visual world eye-tracking}, a widely used experimental method in psycholinguistic research. We highlight the role that visual world eye-tracking has played in the burgeoning field of experimental pragmatics, which suffers particularly acutely from a lack of clear and justified linking assumptions. We then test a (usually implicitly) made linking assumption for referential tasks, which we term the \emph{Referential Belief} linking assumption: that the proportion of looks to a referent in a time window reflects participants' degree of belief that the referent is the intended target in that time window. To do so, we compare eye movement data against explicit beliefs collected in an incremental decision task. We make use of a previously collected eye movement dataset on scalar implicature processing \cite<\expref{3} of>{sun2020}. In \expref{1} we collect explicit beliefs to test against \citeA{sun2020}'s eye movement data. In \expref{2}, we replicate  \citeA{sun2020} in a web-based eye-tracking paradigm using \texttt{WebGazer.js}. 
 
 \section{Linking assumptions for visual world eye-tracking}
 
