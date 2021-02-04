@@ -89,11 +89,7 @@ psycholinguistics; experimental pragmatics;  scalar implicature; linking functio
 
 \section{Introduction}
 
-<<<<<<< HEAD
-Experimental investigation is integral to scientific inquiry in cognitive science, and experimental data has informed cognitive theory-building for centuries. A fundamental ingredient in  using empirical data to put theories to the test is the assumption made by researchers about the mapping between theoretical notions and empirical measurements: the \emph{linking assumption}. Indeed, empirical measurements are only informative if the  linking assumption is (sufficiently) clear and justified. We argue that both clarity and justification are often lacking for linking assumptions made for \emph{visual world eye-tracking}, a widely used experimental method in psycholinguistic research. We highlight the role that visual world eye-tracking has played in the burgeoning field of experimental pragmatics, which suffers particularly acutely from a lack of clear and justified linking assumptions. We then test a (usually implicitly) made linking assumption for referential tasks, which we term the \emph{Referential Belief} linking assumption: that the proportion of looks to a referent in a time window reflects participants' degree of belief that the referent is the intended target in that time window. To do so, we compare eye movement data against explicit beliefs collected in an incremental decision task. We make use of a previously collected eye movement dataset on scalar implicature processing \cite<\expref{3} of>{sun2020}. In \expref{1} we collect explicit beliefs to test against \citeA{sun2020}'s eye movement data.    \jd{In \expref{2}, we replicate  \citeA{sun2020} in a web-based eye-tracking paradigm using \texttt{WebGazer.js} }. 
-=======
-Experimental investigation is a key method of scientific inquiry in cognitive science, and experimental data has informed cognitive theory-building for centuries. A key ingredient in  using empirical data to put theories to the test is the assumption made by researchers about how the mapping between theoretical notions and empirical measurements: the \emph{linking assumption}. Indeed, empirical measurement, and the data resulting from it, are only useful and informative if the assumed linking assumption is (sufficiently) clear and justified. We argue that both clarity and justification are currently typically lacking for linking assumptions made for \emph{visual world eye-tracking}, a widely used experimental method in psycholinguistic research. We highlight the role that visual world eye-tracking has played in the burgeoning field of experimental pragmatics, which suffers particularly acutely from a lack of clear and justified linking assumptions. We then test a (usually implicitly) assumed linking assumption for referential tasks, which we term the \emph{Referential Belief} linking assumption: that the proportion of looks to a referent in a time window reflects participants' degree of belief that the referent is the intended target in that time window. To do so, we compare eye movement data against explicit beliefs collected in an incremental decision task. We make use of a previously collected eye movement dataset on scalar implicature processing \cite<\expref{3}>{sun2020}, \jd{which we also replicate in a web-based eye-tracking paradigm using \texttt{WebGazer.js}  (\expref{2})}. We collect explicit beliefs to test against the original and replicated eye movement data in \expref{1}. 
->>>>>>> c30c11513d4ad62850081b5284bef639638043ba
+Experimental investigation is integral to scientific inquiry in cognitive science, and experimental data has informed cognitive theory-building for centuries. A fundamental ingredient in  using empirical data to put theories to the test is the assumption made by researchers about the mapping between theoretical notions and empirical measurements: the \emph{linking assumption}. Indeed, empirical measurements are only informative if the  linking assumption is (sufficiently) clear and justified. We argue that both clarity and justification are often lacking for linking assumptions made in \emph{visual world eye-tracking}, a widely used experimental method in psycholinguistic research. We highlight the role that visual world eye-tracking has played in the burgeoning field of experimental pragmatics, which suffers particularly acutely from a lack of clear and justified linking assumptions. We then test a (usually implicitly) made linking assumption for referential tasks, which we term the \emph{Referential Belief} linking assumption: that the proportion of looks to a referent in a time window reflects participants' degree of belief that the referent is the intended target in that time window. To do so, we compare eye movement data against explicit beliefs collected in an incremental decision task. We make use of a previously collected eye movement dataset on scalar implicature processing \cite<\expref{3} of>{sun2020}. In \expref{1} we collect explicit beliefs to test against \citeA{sun2020}'s eye movement data. In \expref{2}, we replicate  \citeA{sun2020} in a web-based eye-tracking paradigm using \texttt{WebGazer.js}. 
 
 \section{Linking assumptions for visual world eye-tracking}
 
@@ -124,14 +120,14 @@ Their predictions were borne out (see target advantage scores in  \figref{fig:re
 
 Jointly, their results support what they call the fast-pragmatic account: the view that the computation of scalar inferences itself is not delayed compared to literal processing, and that previously reported apparent slowdowns in processing of \emph{some} are instead likely due to joint effects of verification time and low-level set size associations for \emph{all} which facilitate the processing of big \emph{all} compared to small \emph{some}. 
 
-\begin{figure*}[tbh!]
+\begin{figure}[tbh!]
 \centering
 %\includegraphics[width=\columnwidth]{images/results-original}
-\includegraphics[width=\textwidth]{../../analysis/SunBreheny/1_incremental/main/graphs/proportions_condsize_withresidue_tr.pdf}
-\includegraphics[width=\textwidth]{../../analysis/SunBreheny/2_webgazer/main/graphs/proportions_condsize_withresidue_tr.pdf}
-\caption{Proportion of looks (out of target, competitor, and residue looks) to target (left) and residue (right) from instruction onset. Transparent ribbons indicate 95\% bootstrapped confidence intervals. Black vertical lines indicate onsets of analysis windows of interest (window labels at top of graphs). \textbf{Top:} \expref{3} of \citeA{sun2020}. \textbf{Bottom:} Our \expref{2}.}
+\includegraphics[width=\columnwidth]{../../analysis/SunBreheny/1_incremental/main/graphs/proportions_condsize_withresidue_target}
+\includegraphics[width=\columnwidth]{../../analysis/SunBreheny/2_webgazer/main/graphs/proportions_condsize_withresidue_target}
+\caption{Proportion of target looks (out of target, competitor, and residue looks) from instruction onset. Transparent ribbons indicate 95\% bootstrapped confidence intervals. Black vertical lines indicate onsets of analysis windows of interest (window labels at top of graphs). \textbf{Top:} \expref{3} of \citeA{sun2020}. \textbf{Bottom:} Our \expref{2}.}
 \label{fig:results-original}
-\end{figure*}
+\end{figure}
 
 \begin{figure}[tbh!]
 \centering
@@ -152,9 +148,7 @@ In order to measure participants' beliefs about the intended referent at points 
 
 \subsection{Methods}
 
-\textbf{Participants.} We recruited 120 participants on Mechanical Turk, excluding participants with $<$ 95\% accuracy (n=29) and trials on which participants clicked on the wrong target (665 trials)\jd{make sure this was done right}. All participants were self-reported native English speakers.\footnote{Procedure, materials, analyses and exclusions were pre-registered at https://osf.io/vfgc8/?view\_only=ad72b307653e4e02921b7173f9013\hspace{3pt}da6 (Exp.~1) and https://osf.io/y2cgb/?view\_only=8acea9210ef6488b\hspace{3pt}8707e1aa7d47a53e (Exp.~2). The collected sample size for Exp.~2 (183 participants) was larger than the originally pre-registered sample size (102 participants) because 40\% of the initially tested 102 participants had a technical issue and weren't able to see the whole display.}=======
-
-\lk{not sure about payment info, madigan ran the exp}
+\textbf{Participants.} We recruited 120 participants on Mechanical Turk, excluding participants with $<$ 95\% accuracy (n=29) and trials on which participants selected the wrong referent in the last window (665 trials). All participants were self-reported native English speakers.\footnote{Procedure, materials, analyses and exclusions were pre-registered at https://osf.io/vfgc8/?view\_only=ad72b307653e4e02921b7173f9013\hspace{3pt}da6 (Exp.~1) and https://osf.io/y2cgb/?view\_only=8acea9210ef6488b\hspace{3pt}8707e1aa7d47a53e (Exp.~2). The collected sample size for Exp.~2 (183 participants) was larger than the originally pre-registered sample size (102 participants) because 40\% of the initially tested 102 participants had a technical issue and weren't able to see the whole display.}
 
 \textbf{Materials and procedure.} We measured participants' beliefs about the intended referent for each display shown to participants by \citeA{sun2020} (see \figref{fig:display} for examples). Participants were told that they were playing a guessing game, and whenever they made a guess, more words would appear. The critical sentences of the form ``Click on the GENDER who has DETERMINER  of NAME's NOUN" were revealed incrementally. GENDER was one of \emph{boy/girl}, DETERMINER was one of \emph{some/all/two/three}, NAME was one of \emph{Susan/Amy/Michael}, and NOUN was one of \emph{apples/bananas/erasers/scissors/knives/rulers/forks/plates/
 spoons/pencils/pears/oranges}.  Participants clicked on the presumed target after (a) ``Click on the" (baseline window), (b) ``GENDER that has" (gender window), (c) ``DETERMINER of NAME's" (determiner window), and (d) ``NOUN" (noun window). After each click, the next word(s) or display was shown. After 6 practice trials, each participant saw 48 experimental trials, of which 12 were filler trials with the number terms \emph{one} and \emph{four}. The 36 critical trials implemented \citeA{sun2020}'s 2 (big vs.~small target set) by 3 (\emph{all, some}, number) design. 
@@ -167,7 +161,7 @@ spoons/pencils/pears/oranges}.  Participants clicked on the presumed target afte
 \figref{fig:results-idt} shows proportions of target selections out of all selections in each time window and condition. 
 
 
-\textbf{Data analysis}. \citeA{sun2020} fit separate linear regression models to target advantage scores in time windows of interest. We instead fit logistic mixed effects models predicting target selections. This choice was motivated by logistic regression being the more principled approach to modeling categorical data. It also avoids the problems of having to pre-aggregate data and add smoothing terms to avoid division by zero (or having to discard mathematically problematic data points all together). \jd{The results are qualitatively identical if we instead run linear models on target preference scores. (??)}
+\textbf{Data analysis}. \citeA{sun2020} fit separate linear regression models to target advantage scores in time windows of interest. We instead fit logistic mixed effects models predicting target selections. This choice was motivated by logistic regression being the more principled approach to modeling categorical data. It also avoids problems like pre-aggregating data and adding smoothing terms to avoid division by zero or discarding mathematically problematic data points. %\jd{The results are qualitatively identical if we instead run linear models on target preference scores. (??)}
 
 \citeA{sun2020} fit separate models to the baseline, gender, determiner, name, and noun windows. We collapsed the name window into the determiner window because the name does not add disambiguating information. The models predicted target over competitor choices from fixed effects of quantifier (reference level: ``number"), centered size (higher value: ``big"), by-item and by-subject random intercepts, and random by-subject slopes for condition and size. No effects reached significance in the baseline, gender, and noun window, as expected.\footnote{In fact, fitting models to the noun window was impossible because participants, with very few exceptions, always chose the target. That is, there was no variance to speak of that a model could be estimated to explain.}  In the determiner window, the window of interest, there were main effects of condition, such that target selections were less likely in both the \emph{some} ($\beta$=-2.90, $SE$=0.36, $p<$.0001) and \emph{all} ($\beta$=-2.92, $SE$=0.36, $p<$.0001) conditions, compared to the number condition. There was no main effect of size, consistent with the visual result that target selections in the number condition are not modulated by  target set size ($\beta$=-0.09, $SE$=0.26, $p<$.73). However, we did observe interactions between quantifier and size, such that small sets resulted in more target selections for \emph{some} ($\beta$=0.59, $SE$=0.28, $p<$.05) but fewer target selections for \emph{all} ($\beta$=-1.27, $SE$=0.29, $p<$.0001), compared to number terms. 
 
@@ -180,16 +174,7 @@ spoons/pencils/pears/oranges}.  Participants clicked on the presumed target afte
 
 
 
-\textbf{Comparison with \citeA{sun2020}: replication analysis}. These results constitute a near-perfect replication of  \citeA{sun2020}. Most of their effects reported in the determiner window replicated, with two exceptions: we did not observe a main effect of set size, while they did; and we observed an interaction of size and determiner such that small \emph{some} led to greater target selections than big \emph{some}. These differences are not as big as they may seem: in our dataset, the lack of set size main effect can be explained by the interactions with determiner: while size makes no difference at all for number (the determiner predictor reference level), it has the opposite effect for \emph{all} compared to \emph{some}. A similar tendency can be observed in  \citeA{sun2020}'s results when taking into account the joint determiner and name windows. In fact,  \citeA{sun2020} report the absence of a main effect for size in the name window, and instead an interaction between size and determiner. While they do not report the same post hoc analyses, visual inspection of \figref{fig:results-original} suggests that the interaction in the name window is indeed the result of set size having the opposite effect for \emph{all} compared to \emph{some}. Thus, when taking into account their results from both the determiner and name window, which we collapsed into one, the results are qualitatively identical. The different results reported by  \citeA{sun2020} in the two time windows are presumably the result of certain information taking longer to be integrated, something which the incremental decision task by its offline nature cannot capture. \jd{if time, re-analyze their results with logistic models?}
-
-
-
-\textbf{Comparison with \citeA{sun2020}: linking function analysis}. \figref{fig:corr-window} shows the correlation between  proportion of selections in \expref{1} and proportions of looks in \citeA{sun2020}. The overall correlation was very high ($r(862) = .87$, $p < .0001$), suggesting preliminary support for the Referential Belief link. To investigate whether the predictive power of explicit beliefs was modulated by additional factors, we conducted a linear regression analysis %\footnote{\jd{Beta regression is the appropriate analysis here because prooprtions are bounded by [0,1]. For simplicity, linear regression. If time, also do Beta regression and report whether results similar.}} 
-predicting proportion of looks from fixed effects of proportion of selections (mean-centered) and its 2-way interactions with time window (dummy-coded, reference level: `determiner') and region of interest (dummy-coded, reference level: `target'). There was a large and significant effect of selection proportion  ($\beta$=0.79, $SE$=0.02, $t$=32.31, $p<$.0001), such that stronger beliefs resulted in more looks. This effect was modulated by time window: selection proportion was a less good predictor of looks in the baseline window   ($\beta$=-0.11, $SE$=0.05, $t$=-2.25, $p<$.05), a better predictor in the noun window   ($\beta$=0.13, $SE$=0.03, $t$=5.18, $p<$.0001), and there was no evidence for a difference in the gender window    ($\beta$=-0.02, $SE$=0.04, $t$=-0.61, $p<$.55), compared to the determiner window. The effect was also modulated by the region of interest: selection proportion was a less good predictor of competitor looks ($\beta$=-0.46, $SE$=0.03, $t$=-13.16, $p<$.0001) and distractor looks  ($\beta$=-0.33, $SE$=0.03, $t$=-9.89, $p<$.0001) than for target looks (see \figref{fig:corr-region}).
-
-
-%For the purpose of evaluating the Referential Belief link, we conduct correlational analyses at different levels. The overall correlation between proportion of selections in \expref{1} and proportions of looks to target, competitor, and distractors in \citeA{sun2020} at the item level, i.e., where proportions were calculated separately by region of interest (target, competitor, distractors), time window (baseline, gender, determiner$+$name, noun), determiner (\emph{all, some}, number), set size (big, small), and noun, was high ($r(862) = .87$, $p < .0001$). More interesting than inspecting the overall correlation, however, is to investigate the conditions under which explicit and implicit beliefs are more and less closely aligned. For this purpose, we examined the correlations by time window (see \figref{fig:corr-window}), by condition for the determiner window of interest   (see \figref{fig:corr-determiner}), and by region of interest  (see \figref{fig:corr-region}).
-
+\textbf{Comparison with \citeA{sun2020}: replication analysis}. These results constitute a near-perfect replication of  \citeA{sun2020}. Most of their effects reported in the determiner window replicated, with two exceptions (see overview in \tableref{tab:replication}): we did not observe a main effect of set size, while they did; and we observed an interaction of size and determiner such that small \emph{some} led to greater target selections than big \emph{some}. These differences are not as big as they may seem: in our dataset, the lack of set size main effect can be explained by the interactions with determiner: while size makes no difference at all for number (the determiner predictor reference level), it has the opposite effect for \emph{all} compared to \emph{some}. A similar tendency can be observed in  \citeA{sun2020}'s results when taking into account the joint determiner and name windows. In fact,  \citeA{sun2020} report the absence of a main effect for size in the name window, and instead an interaction between size and determiner. While they do not report the same post hoc analyses, visual inspection of \figref{fig:results-original} suggests that the interaction in the name window is indeed the result of set size having the opposite effect for \emph{all} compared to \emph{some}. Thus, when taking into account their results from both the determiner and name window, which we collapsed into one, the results are qualitatively identical. The different results reported by  \citeA{sun2020} in the two time windows are presumably the result of certain information taking longer to be integrated, something which the incremental decision task by its offline nature cannot capture. %\jd{if time, re-analyze their results with logistic models?}
 
 \begin{figure*}
 \centering
@@ -212,6 +197,12 @@ predicting proportion of looks from fixed effects of proportion of selections (m
 \label{fig:corr-region}
 \end{figure}
 
+\textbf{Comparison with \citeA{sun2020}: linking function analysis}. \figref{fig:corr-window} shows the correlation between  proportion of selections in \expref{1} and proportions of looks in \citeA{sun2020}. The overall correlation was very high ($r(862) = .87$, $p < .0001$), suggesting preliminary support for the Referential Belief link. To investigate whether the predictive power of explicit beliefs was modulated by additional factors, we conducted a linear regression analysis %\footnote{\jd{Beta regression is the appropriate analysis here because prooprtions are bounded by [0,1]. For simplicity, linear regression. If time, also do Beta regression and report whether results similar.}} 
+predicting proportion of looks from fixed effects of proportion of selections (mean-centered) and its 2-way interactions with time window (dummy-coded, reference level: `determiner') and region of interest (dummy-coded, reference level: `target'). There was a large and significant effect of selection proportion  ($\beta$=0.79, $SE$=0.02, $t$=32.31, $p<$.0001), such that stronger beliefs resulted in more looks. This effect was modulated by time window: selection proportion was a less good predictor of looks in the baseline window   ($\beta$=-0.11, $SE$=0.05, $t$=-2.25, $p<$.05), a better predictor in the noun window   ($\beta$=0.13, $SE$=0.03, $t$=5.18, $p<$.0001), and there was no evidence for a difference in the gender window    ($\beta$=-0.02, $SE$=0.04, $t$=-0.61, $p<$.55), compared to the determiner window. The effect was also modulated by the region of interest: selection proportion was a less good predictor of competitor looks ($\beta$=-0.46, $SE$=0.03, $t$=-13.16, $p<$.0001) and distractor looks  ($\beta$=-0.33, $SE$=0.03, $t$=-9.89, $p<$.0001) than for target looks (see \figref{fig:corr-region}).
+
+
+%For the purpose of evaluating the Referential Belief link, we conduct correlational analyses at different levels. The overall correlation between proportion of selections in \expref{1} and proportions of looks to target, competitor, and distractors in \citeA{sun2020} at the item level, i.e., where proportions were calculated separately by region of interest (target, competitor, distractors), time window (baseline, gender, determiner$+$name, noun), determiner (\emph{all, some}, number), set size (big, small), and noun, was high ($r(862) = .87$, $p < .0001$). More interesting than inspecting the overall correlation, however, is to investigate the conditions under which explicit and implicit beliefs are more and less closely aligned. For this purpose, we examined the correlations by time window (see \figref{fig:corr-window}), by condition for the determiner window of interest   (see \figref{fig:corr-determiner}), and by region of interest  (see \figref{fig:corr-region}).
+
 
 These results suggest strong support for the Referential Belief link: across the board, subjective referential beliefs quantified as proportion of selections were a good predictor of proportions of looks. This support is tempered by some of the auxiliary findings in interesting ways. For instance, the fact that selections were a better predictor of target than of competitor and distractor looks suggests that looks to these regions may be driven more strongly by other cognitive processes, e.g.,  verification or noise processes. Similarly, the apparently gradient increase in predictive power of selections from baseline through noun window may reflect the important role that uncertainty plays \jd{really? not just statistical artifact?} 
 
@@ -220,8 +211,6 @@ Finally, a model that also included interactions with experimental conditions of
 \jd{residue set issue?}
 
 \section{Exp.~2: replicating Sun \& Breheny (2020) using web-based eye-tracking}
-
-\jd{\dots will it work? tbd.}
 
 \subsection{Methods}
 
@@ -273,6 +262,7 @@ time & + &  ? & NA & $\cdot$ & + \\
 \bottomrule
 \end{tabular}
 }
+\label{tab:replication}
 \end{table}
 
 \textbf{Comparison with \citeA{sun2020}: replication analysis}. \jd{fill in}
@@ -307,44 +297,44 @@ The latency of these effects indicate we are some way from being able to conduct
 Much more investigation is needed into whether different methodological and implementation decisions might yield more reliable results. Two-image displays that allow for greater distance between the regions of interest may reduce noise, for example, but validation through replication of existing work is needed. More rigorous and frequent accuracy checks throughout the task may also improve the clarity of the resulting data: in Exp. 3, participants completed an initial calibration and accuracy check, and were able to proceed if they scored above 50\%. Given the novelty of the medium, we do not know whether increasing this threshold might increase clarity, or whether additional accuracy checks might better ensure that participants' eye movements were still being tracked as reliably as possible. 
 
 
-Hypothetical speaker distribution for small set:
-\begin{eqnarray*}
-S("two"|small) = .8\\
-S("three"|small) = 0\\
-S("all"|small) = .05\\
-S("some"|small) = .15\\
-\end{eqnarray*}
-
-Hypothetical speaker distribution for big set:
-\begin{eqnarray*}
-S("two"|big) = 0\\
-S("three"|big) = .6\\
-S("all"|big) = .3\\
-S("some"|big) = .1\\
-\end{eqnarray*}
-
-The above speaker assumptions result in (observed) small target advantage for small-some over big-some:
-\begin{eqnarray*}
-L(small|"some") =  \frac{S("some"|small)}{(S("some"|small) + S("some"|big))} \\
-= .15 / (.15+.1) = .6\\
-L(big|"some") = \frac{S("some"|big)}{(S("some"|small) + S("some"|big))} \\
-= .1 / (.15+.1) = .4
-\end{eqnarray*}
-
-The above speaker assumptions result in (observed) large target advantage for big-all over small-all:
-\begin{eqnarray*}
-L(small|"all") = \frac{S("all"|small)}{(S("all"|small) + S("all"|big))}\\ 
-= .05 / (.05+.3) = .14\\
-L(big|"all") = .3 / (.05+.3) = .86
-\end{eqnarray*}
-
-Numbers behave categorically (assuming exact semantics):
-\begin{eqnarray*}
-L(small|"two") = 1\\
-L(big|"two") = 0\\
-L(small|"three") = 0\\
-L(big|"three") = 1
-\end{eqnarray*}
+%Hypothetical speaker distribution for small set:
+%\begin{eqnarray*}
+%S("two"|small) = .8\\
+%S("three"|small) = 0\\
+%S("all"|small) = .05\\
+%S("some"|small) = .15\\
+%\end{eqnarray*}
+%
+%Hypothetical speaker distribution for big set:
+%\begin{eqnarray*}
+%S("two"|big) = 0\\
+%S("three"|big) = .6\\
+%S("all"|big) = .3\\
+%S("some"|big) = .1\\
+%\end{eqnarray*}
+%
+%The above speaker assumptions result in (observed) small target advantage for small-some over big-some:
+%\begin{eqnarray*}
+%L(small|"some") =  \frac{S("some"|small)}{(S("some"|small) + S("some"|big))} \\
+%= .15 / (.15+.1) = .6\\
+%L(big|"some") = \frac{S("some"|big)}{(S("some"|small) + S("some"|big))} \\
+%= .1 / (.15+.1) = .4
+%\end{eqnarray*}
+%
+%The above speaker assumptions result in (observed) large target advantage for big-all over small-all:
+%\begin{eqnarray*}
+%L(small|"all") = \frac{S("all"|small)}{(S("all"|small) + S("all"|big))}\\ 
+%= .05 / (.05+.3) = .14\\
+%L(big|"all") = .3 / (.05+.3) = .86
+%\end{eqnarray*}
+%
+%Numbers behave categorically (assuming exact semantics):
+%\begin{eqnarray*}
+%L(small|"two") = 1\\
+%L(big|"two") = 0\\
+%L(small|"three") = 0\\
+%L(big|"three") = 1
+%\end{eqnarray*}
 
 \dots of course this all just captures the categorical belief data and can't handle verification (eg looks to residue set) at all; must bridge to algorithmic level
 
