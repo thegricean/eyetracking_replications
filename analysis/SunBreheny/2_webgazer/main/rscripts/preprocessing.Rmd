@@ -431,10 +431,34 @@ ggplot(ttoplot, aes(x=binned_time_relative,y=proportion)) +
   facet_wrap(~region)
 ggsave("../graphs/proportions_condsize_withresidue_tr.pdf",width=9,height=3)
 
+# only target
+tttoplot = toplot %>% 
+  filter(region == "target" & binned_time_relative < 3301) %>% 
+  droplevels() 
+  
 
+ggplot(tttoplot, aes(x=binned_time_relative,y=proportion)) +
+  geom_line(size=1, aes(color=determiner,linetype=size)) +
+  geom_ribbon(aes(ymin=ymin,ymax=ymax,fill=determiner,group=interaction(determiner,size)),alpha=.3) +
+  scale_fill_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
+  scale_color_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
+  geom_vline(aes(xintercept=onsets$gender),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$determiner),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$name),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$noun),size=vlinesize) +
+  geom_text(data=windows,aes(label=window,x=x),y=.95,size=2.5) +
+  xlab("Time in ms relative to audio onset") +
+  ylab("Proportion of looks to target") + 
+  ylim(0,1) +
+  scale_x_continuous(breaks=seq(0,3300,by=400),minor_breaks = seq(200,3200,by=400),limits=c(0,3300)) #+
+  # facet_wrap(~region)
+ggsave("../graphs/proportions_condsize_withresidue_target.pdf",width=5,height=3)
 
+```
 
-# CONTINUE HERE WITH MAKING MODEL 
+```{r message=F, warning=F}
+
+# MODELS
 # subset of dd that has looks to either target or competitor and occurs in the determiner/name window 
 # size of time bins to collapse over
 # binsize = 100
@@ -461,6 +485,40 @@ dd_model = dd %>%
                             time_rel_noun_onset < 0 ~ "name",
                             TRUE ~ "noun")) %>% 
   filter(target_look == "1" | competitor_look == "1") # keep only target & competitor looks for analysis
+
+
+# determiner + name window analysis
+dd_dn = dd_model %>%
+  filter(window=="determiner" | window == "name") %>%
+  # mutate(time_fct = relative_time/100) %>%
+  mutate(target_look=as.factor(target_look),size=factor(x=size,levels=c("small","big")),condition=as.factor(condition)) %>%
+  mutate(csize=as.numeric(size)-mean(as.numeric(size)),ctime=(time_rel_determiner_onset/100)- mean(time_rel_determiner_onset/100))
+
+# sanity checks and setting/checking contrasts
+nrow(dd_dn) #14703 data points
+str(dd_dn)
+contrasts(dd_dn$size)
+contrasts(dd_dn$condition) = cbind("num.v.all"=c(1,0,0),"num.v.some"=c(0,0,1)) #reference level: "num"
+contrasts(dd_dn$condition)
+summary(dd_dn$time_rel_determiner_onset)
+summary(dd_dn$ctime)
+contrasts(dd_dn$target_look)
+
+m.dn = glmer(target_look ~ condition*csize*ctime + 
+                       # (1|workerid) + 
+                       # (1|Noun),
+                       (1+condition+csize+ctime|workerid) +
+                     (1+condition+csize+ctime|Noun),
+                     family="binomial",data=dd_dn)
+summary(m.dn)
+# more iterations:
+ssd = getME(m.determiner,c("theta","fixef"))
+m.determiner.2 = update(m.determiner,start=ssd,control=glmerControl(optCtrl=list(maxfun=2e4)))
+summary(m.determiner.2)
+
+
+
+
 
 # determiner window analysis
 dd_determiner = dd_model %>%
@@ -547,6 +605,58 @@ m.baseline = glmer(target_look ~ condition*csize*ctime +
                      family="binomial",data=dd_baseline)
 summary(m.baseline)
 
+
+# gender window analysis
+dd_gender = dd_model %>%
+  filter(window=="gender") %>%
+  # mutate(time_fct = relative_time/100) %>%
+  mutate(target_look=as.factor(target_look),size=factor(x=size,levels=c("small","big")),condition=as.factor(condition)) %>%
+  mutate(csize=as.numeric(size)-mean(as.numeric(size)),ctime=(time_rel_name_onset/100)- mean(time_rel_name_onset/100))
+
+# sanity checks and setting/checking contrasts
+nrow(dd_gender) #7740 data points
+str(dd_gender)
+contrasts(dd_gender$size)
+contrasts(dd_gender$condition) = cbind("num.v.all"=c(1,0,0),"num.v.some"=c(0,0,1))
+contrasts(dd_gender$condition)
+summary(dd_gender$time_rel_click_onset)
+summary(dd_gender$ctime)
+contrasts(dd_gender$target_look)
+
+m.gender = glmer(target_look ~ condition*csize*ctime + 
+                       # (1|workerid) + 
+                       # (1|Noun),
+                       (1+condition+csize+ctime|workerid) +
+                     (1+condition+csize+ctime|Noun),
+                     family="binomial",data=dd_gender)
+summary(m.gender)
+
+
+# noun window analysis
+dd_noun = dd_model %>%
+  filter(window=="noun") %>%
+  # mutate(time_fct = relative_time/100) %>%
+  mutate(target_look=as.factor(target_look),size=factor(x=size,levels=c("small","big")),condition=as.factor(condition)) %>%
+  filter(time_rel_noun_onset < 600) %>% 
+  mutate(csize=as.numeric(size)-mean(as.numeric(size)),ctime=(time_rel_name_onset/100)- mean(time_rel_name_onset/100))
+
+# sanity checks and setting/checking contrasts
+nrow(dd_noun) #8664 data points
+str(dd_noun)
+contrasts(dd_noun$size)
+contrasts(dd_noun$condition) = cbind("num.v.all"=c(1,0,0),"num.v.some"=c(0,0,1))
+contrasts(dd_noun$condition)
+summary(dd_noun$time_rel_noun_onset)
+summary(dd_noun$ctime)
+contrasts(dd_noun$target_look)
+
+m.noun = glmer(target_look ~ condition*csize*ctime + 
+                       # (1|workerid) + 
+                       # (1|Noun),
+                       (1+condition+csize+ctime|workerid) +
+                     (1+condition+csize+ctime|Noun),
+                     family="binomial",data=dd_noun)
+summary(m.noun)
 ```
 
 Plot proportions of looks to target and competitor in determiner window overall
