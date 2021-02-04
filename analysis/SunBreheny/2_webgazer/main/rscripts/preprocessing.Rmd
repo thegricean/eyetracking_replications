@@ -431,35 +431,148 @@ ggplot(ttoplot, aes(x=binned_time_relative,y=proportion)) +
   facet_wrap(~region)
 ggsave("../graphs/proportions_condsize_withresidue_tr.pdf",width=9,height=3)
 
+
+
+
 # CONTINUE HERE WITH MAKING MODEL 
 # subset of dd that has looks to either target or competitor and occurs in the determiner/name window 
-dd_subset = dd_binned %>%
-  select(workerid,condition,size,determiner,Name,Noun,webgazer_time,first_sample,relative_time,click_onset_ms_200shift,gender_onset_ms_200shift,determiner_onset_ms_200shift,name_onset_ms_200shift,noun_onset_ms_200shift,target_look,competitor_look) %>%
-  mutate(determiner_window = ifelse(1000+determiner_onset_ms_200shift<relative_time,ifelse(relative_time<1000+name_onset_ms_200shift,1,0),0)) %>%
-  mutate(name_window = ifelse(1000+name_onset_ms_200shift<relative_time,ifelse(relative_time<1000+noun_onset_ms_200shift,1,0),0)) %>%
-  filter(target_look == 1 | competitor_look == 1)
+# size of time bins to collapse over
+# binsize = 100
 
-dd_determiner = dd_subset %>%
-  filter(determiner_window==1) %>%
-  mutate(time_fct = relative_time/100) %>%
-  mutate(target_look=as.factor(target_look),size=as.factor(size),time_fct=as.factor(time_fct)) %>%
-  mutate(csize=as.numeric(size)-mean(as.numeric(size))) %>%
-  mutate(ctime_fct=as.numeric(time_fct)-mean(as.numeric(time_fct)))
+# create windows and align to audio onset + 200
+dd_model = dd %>% 
+  left_join(first_samples,by=c("workerid","slide_number")) %>% 
+  mutate(first_sample = as.numeric(first_sample)) %>% 
+  mutate(relative_time = webgazer_time-first_sample) %>% 
+  mutate(relative_time_unix = unixtlist-first_unix) %>%
+  mutate(time_rel_click_onset = relative_time - 1000 - click_onset_ms_200shift) %>% 
+  mutate(time_rel_gender_onset = relative_time - 1000 - gender_onset_ms_200shift) %>% 
+  mutate(time_rel_determiner_onset = relative_time - 1000 - determiner_onset_ms_200shift) %>% 
+  mutate(time_rel_name_onset = relative_time - 1000 - name_onset_ms_200shift) %>% 
+  mutate(time_rel_noun_onset = relative_time - 1000 - noun_onset_ms_200shift) %>%
+  mutate(time_bin=floor(time_rel_click_onset/binsize)) %>% 
+  mutate(time_bin_gender=floor(time_rel_gender_onset/binsize)) %>% 
+  filter(time_rel_click_onset >= 0 & time_rel_click_onset < 4000) %>% # cut off any samples after maxtime (eg 5 seconds) %>%
+  # mutate(binned_time_relative = time_bin*binsize) #%>%
+  mutate(window = case_when(time_rel_click_onset < 0 ~ "preview", # make windows
+                            time_rel_gender_onset < 0 ~ "baseline",
+                            time_rel_determiner_onset < 0 ~ "gender",
+                            time_rel_name_onset < 0 ~ "determiner",
+                            time_rel_noun_onset < 0 ~ "name",
+                            TRUE ~ "noun")) %>% 
+  filter(target_look == "1" | competitor_look == "1") # keep only target & competitor looks for analysis
 
-dd_name = dd_subset %>%
-  filter(name_window==1) %>%
-  mutate(time_fct = relative_time/100) %>%
-  mutate(target_look=as.factor(target_look),size=as.factor(size),time_fct=as.factor(time_fct)) %>%
-  mutate(csize=as.numeric(size)-mean(as.numeric(size))) %>%
-  mutate(ctime_fct=as.numeric(time_fct)-mean(as.numeric(time_fct)))
+# determiner window analysis
+dd_determiner = dd_model %>%
+  filter(window=="determiner") %>%
+  # mutate(time_fct = relative_time/100) %>%
+  mutate(target_look=as.factor(target_look),size=factor(x=size,levels=c("small","big")),condition=as.factor(condition)) %>%
+  mutate(csize=as.numeric(size)-mean(as.numeric(size)),ctime=(time_rel_determiner_onset/100)- mean(time_rel_determiner_onset/100))
 
-m.determiner = glmer(target_look ~ determiner*csize*ctime_fct + (determiner*csize*ctime_fct|workerid) + (1+determiner*csize*ctime_fct|Noun), family="binomial",data=dd_determiner)
+# sanity checks and setting/checking contrasts
+nrow(dd_determiner) #7539 data points
+str(dd_determiner)
+contrasts(dd_determiner$size)
+contrasts(dd_determiner$condition) = cbind("num.v.all"=c(1,0,0),"num.v.some"=c(0,0,1)) #reference level: "num"
+contrasts(dd_determiner$condition)
+summary(dd_determiner$time_rel_determiner_onset)
+summary(dd_determiner$ctime)
+contrasts(dd_determiner$target_look)
+
+m.determiner = glmer(target_look ~ condition*csize*ctime + 
+                       # (1|workerid) + 
+                       # (1|Noun),
+                       (1+condition+csize+ctime|workerid) +
+                     (1+condition+csize+ctime|Noun),
+                     family="binomial",data=dd_determiner)
 summary(m.determiner)
+# more iterations:
+ssd = getME(m.determiner,c("theta","fixef"))
+m.determiner.2 = update(m.determiner,start=ssd,control=glmerControl(optCtrl=list(maxfun=2e4)))
+summary(m.determiner.2)
 
-m.name = glmer(target_look ~ determiner*csize*ctime_fct + (determiner*csize*ctime_fct|workerid) + (1+determiner*csize*ctime_fct|Noun), family="binomial",data=dd_name)
+# name window analysis
+dd_name = dd_model %>%
+  filter(window=="name") %>%
+  # mutate(time_fct = relative_time/100) %>%
+  mutate(target_look=as.factor(target_look),size=factor(x=size,levels=c("small","big")),condition=as.factor(condition)) %>%
+  mutate(csize=as.numeric(size)-mean(as.numeric(size)),ctime=(time_rel_name_onset/100)- mean(time_rel_name_onset/100))
+
+# sanity checks and setting/checking contrasts
+nrow(dd_name) #7164 data points
+str(dd_name)
+contrasts(dd_name$size)
+contrasts(dd_name$condition) = cbind("num.v.all"=c(1,0,0),"num.v.some"=c(0,0,1))
+contrasts(dd_name$condition)
+summary(dd_name$time_rel_name_onset)
+summary(dd_name$ctime)
+contrasts(dd_name$target_look)
+
+m.name = glmer(target_look ~ condition*csize*ctime + 
+                       # (1|workerid) + 
+                       # (1|Noun),
+                       (1+condition+csize+ctime|workerid) +
+                     (1+condition+csize+ctime|Noun),
+                     family="binomial",data=dd_name)
 summary(m.name)
 
+# more iterations:
+ss = getME(m.name,c("theta","fixef"))
+m.name.2 = update(m.name,start=ss,control=glmerControl(optCtrl=list(maxfun=2e4)))
+summary(m.name.2)
+
+
+# baseline window analysis
+dd_baseline = dd_model %>%
+  filter(window=="baseline") %>%
+  # mutate(time_fct = relative_time/100) %>%
+  mutate(target_look=as.factor(target_look),size=factor(x=size,levels=c("small","big")),condition=as.factor(condition)) %>%
+  mutate(csize=as.numeric(size)-mean(as.numeric(size)),ctime=(time_rel_name_onset/100)- mean(time_rel_name_onset/100))
+
+# sanity checks and setting/checking contrasts
+nrow(dd_baseline) #4865 data points
+str(dd_baseline)
+contrasts(dd_baseline$size)
+contrasts(dd_baseline$condition) = cbind("num.v.all"=c(1,0,0),"num.v.some"=c(0,0,1))
+contrasts(dd_baseline$condition)
+summary(dd_baseline$time_rel_click_onset)
+summary(dd_baseline$ctime)
+contrasts(dd_baseline$target_look)
+
+m.baseline = glmer(target_look ~ condition*csize*ctime + 
+                       # (1|workerid) + 
+                       # (1|Noun),
+                       (1+condition+csize+ctime|workerid) +
+                     (1+condition+csize+ctime|Noun),
+                     family="binomial",data=dd_baseline)
+summary(m.baseline)
+
 ```
+
+Plot proportions of looks to target and competitor in determiner window overall
+```{r message=F,warning=F}
+agr_det = dd_determiner %>% 
+  group_by(condition,size) %>% 
+  summarize(target_prop=mean(target_look),target_CILow=ci.low(target_look),target_CIHigh=ci.high(target_look)) %>% #,competitor_prop=mean(competitor_look),competitor_CILow=ci.low(competitor_look),competitor_CIHigh=ci.high(competitor_look),center_prop=mean(center_look),center_CILow=ci.low(center_look),center_CIHigh=ci.high(center_look))
+  ungroup() %>% 
+  mutate(target_ymin=target_prop-target_CILow,target_ymax=target_prop+target_CIHigh) #,competitor_ymin=competitor_prop-competitor_CILow,competitor_ymax=competitor_prop+competitor_CIHigh,center_ymin=center_prop-center_CILow,center_ymax=center_prop+center_CIHigh)
+
+ggplot(agr_det, aes(x=condition,y=target_prop,color=condition,shape=size)) +
+  geom_point() +
+  geom_errorbar(aes(ymin=target_ymin,ymax=target_ymax))
+
+
+agr_name = dd_name %>% 
+  group_by(condition,size) %>% 
+  summarize(target_prop=mean(target_look),target_CILow=ci.low(target_look),target_CIHigh=ci.high(target_look)) %>% #,competitor_prop=mean(competitor_look),competitor_CILow=ci.low(competitor_look),competitor_CIHigh=ci.high(competitor_look),center_prop=mean(center_look),center_CILow=ci.low(center_look),center_CIHigh=ci.high(center_look))
+  ungroup() %>% 
+  mutate(target_ymin=target_prop-target_CILow,target_ymax=target_prop+target_CIHigh) #,competitor_ymin=competitor_prop-competitor_CILow,competitor_ymax=competitor_prop+competitor_CIHigh,center_ymin=center_prop-center_CILow,center_ymax=center_prop+center_CIHigh)
+
+ggplot(agr_name, aes(x=condition,y=target_prop,color=condition,shape=size)) +
+  geom_point() +
+  geom_errorbar(aes(ymin=target_ymin,ymax=target_ymax))
+```
+
 
 
 Plot proportions of looks to target and competitor by determiner
