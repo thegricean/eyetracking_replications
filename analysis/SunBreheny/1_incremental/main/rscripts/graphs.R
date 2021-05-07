@@ -280,8 +280,15 @@ cors_window = toplot %>%
   summarize(Correlation=round(cor.test(prop_selections,prop_looks)$estimate,2),P=round(cor.test(prop_selections,prop_looks)$p.value,5))
 cors_window # .57, .81, .91, .96
 
+# how many unique items?
+toplot %>% 
+  filter(window == "baseline" & Region == "target") %>% 
+  select(determiner,size,item) %>% 
+  unique() %>% 
+  nrow()
+
 ggplot(toplot, aes(x=prop_selections, y=prop_looks)) +
-  geom_point(size=2,aes(color=Region)) +
+  geom_point(size=2,aes(color=Region),alpha=.6) +
   geom_smooth(method='lm',size=1,color="grey26",group=1) +
   # geom_smooth(method='lm',size=1,aes(color=Region)) +
   geom_abline(slope=1,linetype="dotted",color="gray40") +
@@ -449,6 +456,14 @@ summary(m)
 # adding interactions with experimental conditions of interest also doesn't change anything
 m = lm(prop_looks ~ cprop_selections + cprop_selections:window + cprop_selections:Region+ cprop_selections:determiner + cprop_selections:size, data=toplot)
 summary(m)
+
+# model for only targets (because full model violates assumption of independence of samples)
+targ = toplot %>% 
+  filter(Region == "target") %>% 
+  mutate(cprop_selections = prop_selections - mean(prop_selections))
+
+m.targ = lm(prop_looks ~ cprop_selections + cprop_selections:window, data=targ)
+summary(m.targ)
 
 
 

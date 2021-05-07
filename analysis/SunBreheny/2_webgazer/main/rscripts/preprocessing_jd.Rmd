@@ -1,0 +1,755 @@
+---
+title: "Sun & Breheny (2019) webgazer replication"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+---
+
+This study is a replication of Sun & Breheny (2019) with the web-based eye-tracking paradigm using the javascript webgazer library.
+
+[Here](https://madiganbrodsky.github.io/eyetracking_replication/experiments/SunBreheny_webgazer/pilot/list1)'s the experiment we're analyzing.
+
+```{r, message=F, warning=F}
+library(tidyverse)
+library(lme4)
+library("readxl")
+
+# this.dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+# setwd(this.dir)
+
+# load helper scripts
+source("helpers.R")
+
+# load target word onsets
+audio_info = read_excel("../data/audiotimes.xlsx")
+
+# set color-blind-friendly color palette
+# color-blind-friendly palette
+cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7") 
+
+# load data 
+d = read.csv('../data/sunbreheny_webgazer_main_experiment-merged.csv') %>%
+  select(-location1,-location2,-location3,-location4,-location5,-location6,-location7,-location8,-location9,-location10,-target_figure,-target_object,-target_num_object,-error) %>% 
+  mutate(target_location = ifelse((target1==1 & target2==7),"topleft",ifelse((target1==2 & target2==8),"bottomleft",ifelse((target1==3 & target2==9),"topright",ifelse((target1==4 & target2==10),"bottomright",NA))))) %>%
+  mutate(competitor_location = ifelse((competitor1==1 & competitor2==7),"topleft",ifelse((competitor1==2 & competitor2==8),"bottomleft",ifelse((competitor1==3 & competitor2==9),"topright",ifelse((competitor1==4 & competitor2==10),"bottomright", NA))))) %>%
+  left_join(audio_info,by=c("audio" = "Prime"))
+
+nrow(d) # 9882 trials, of which 6588 experimental
+table(d$trial_type)
+
+# formatting
+d$webgazer_time = gsub("\\[","",d$webgazer_time)
+d$webgazer_time= gsub("\\]","",d$webgazer_time)
+d$unixtlist= gsub("\\[","",d$unixtlist)
+d$unixtlist= gsub("\\]","",d$unixtlist)
+d$x = gsub("\\[","",d$x)
+d$x = gsub("\\]","",d$x)
+d$y = gsub("\\[","",d$y)
+d$y = gsub("\\]","",d$y)
+```
+
+Demographic information.
+```{r}
+participants = d %>% 
+  select(workerid,subject_information.accuracy,subject_information.age,subject_information.camblock,subject_information.comments, subject_information.eyesight, subject_information.eyesight_task, subject_information.gender, subject_information.headphones, subject_information.language, subject_information.previous_accuracy_attempts, subject_information.time_in_minutes,system.Browser,system.OS) %>% 
+  unique()
+
+unique(participants$subject_information.comments)
+unique(participants[,c("system.Browser","system.OS","subject_information.comments")])
+View(participants[,c("system.Browser","system.OS","subject_information.comments")])
+
+# number of unique participants:
+nrow(participants) # 183 unique participants
+
+# distribution of participant gender
+table(participants$subject_information.gender)
+
+# distribution of completion times
+summary(participants$subject_information.time_in_minutes)
+ggplot(participants, aes(x=subject_information.time_in_minutes)) +
+  geom_histogram()
+
+# distribution of calibration accuracy
+summary(participants$subject_information.accuracy)
+ggplot(participants, aes(x=subject_information.accuracy)) +
+  geom_histogram()
+
+# completion time against calibration accuracy -- no relationship
+ggplot(participants, aes(x=subject_information.accuracy,y=subject_information.time_in_minutes)) +
+  geom_point() +
+  geom_smooth()
+
+# distribution of ages
+summary(participants$subject_information.age)
+ggplot(participants, aes(x=subject_information.age)) +
+  geom_histogram()
+
+# age against calibration accuracy -- no relationship
+ggplot(participants, aes(x=subject_information.accuracy,y=subject_information.age)) +
+  geom_point() +
+  geom_smooth(method="lm")
+
+# eyesight information
+ggplot(participants, aes(x=subject_information.eyesight,fill=subject_information.eyesight_task)) +
+  geom_histogram(stat="count",position="dodge")
+
+# calibration accuracy as a function of eyesight info
+agr = participants %>% 
+  group_by(subject_information.eyesight,subject_information.eyesight_task) %>% 
+  summarize(calibration_accuracy=mean(subject_information.accuracy),time=mean(subject_information.time_in_minutes),calacc_CILow=ci.low(subject_information.accuracy),calacc_CIHigh=ci.high(subject_information.accuracy)) %>% 
+  ungroup() %>% 
+  mutate(YMin=calibration_accuracy-calacc_CILow,YMax=calibration_accuracy+calacc_CIHigh)
+dodge=position_dodge(.9)
+
+ggplot(agr, aes(x=subject_information.eyesight,y=calibration_accuracy,fill=subject_information.eyesight_task)) +
+  geom_bar(stat="identity",position=dodge) +
+  geom_errorbar(aes(ymin=YMin,ymax=YMax),position=dodge,width=.25)
+
+# overall calibration accuracy
+mean(participants$subject_information.accuracy) # 69.27 (10.32)
+sd(participants$subject_information.accuracy)
+
+# distribution of camera views -- some people continued to see video box even during experiment (bug we haven't figured out yet how to fix) 79 people :(
+ggplot(participants, aes(x=subject_information.camblock,fill=subject_information.camblock)) +
+  geom_histogram(stat="count")
+table(participants$subject_information.camblock)
+prop.table(table(participants$subject_information.camblock)) # 43% continue to see video box :(
+
+# distribution of headphone use
+ggplot(participants, aes(x=subject_information.headphones)) +
+  geom_histogram(stat="count")
+
+# distribution of native languages
+ggplot(participants, aes(x=subject_information.language)) +
+  geom_histogram(stat="count") +
+  theme(axis.text.x=element_text(angle=45, hjust=1,vjust=1))
+```
+
+
+Exclusions. 
+```{r,message=F,warning=F}
+d = d %>% 
+  mutate(camview=subject_information.camblock,selection_correct = ifelse(as.character(response) == as.character(target1),1, ifelse(as.character(response) == as.character(target2),1,0)),language = tolower(subject_information.language))
+
+table(d$selection_correct)
+
+# exclude anyone with < 95% correct selections
+accuracy = d %>% 
+  filter(trial_type != "Prac") %>% 
+  group_by(workerid,camview) %>% 
+  tally(selection_correct) %>% 
+  mutate(correct=n/48) 
+View(accuracy %>% arrange(n))
+
+toexclude = accuracy %>% 
+  filter(correct < .95)
+
+length(toexclude$workerid) # exclude 21 subjects
+length(toexclude$workerid)/length(accuracy$workerid) # exclude 11.5% of subjects
+
+d = d %>% 
+  filter(!workerid %in% toexclude$workerid)
+
+nrow(d) # 8748 left
+
+# native langugae
+unique(d$language) # everyone english, no exclusions
+
+# trials with incorrect selections
+d = d %>% 
+  filter(selection_correct==1)
+nrow(d) # 7791 left, excluded another 11%
+
+# total exclusions:
+(9882-7791)/9882 # 21%
+
+# get only experimental trials (no fillers) for further analysis
+d = d %>% 
+  filter(trial_type=="Exp") %>%
+  droplevels()
+
+fillers = d %>% 
+  filter(trial_type=="Filler") %>%
+  droplevels()
+
+nrow(d) # 5803 trials for analysis, 963-971 in each of the 6 conditions
+table(d$condition,d$size)
+nrow(fillers) # 1940 filler trials
+```
+
+
+
+Separate time and x/y coordinates into separate data points, one per row, and define regions of interest (ROIs).
+```{r,message=F,warning=F}
+# set width and height of ROIs
+wipadding = 60 # inside width padding (towards center)
+wopadding = 0 # outside width padding (out of the 1280 edges on either side, since images are smooshed right up against the edge)
+hpadding = 0 # only add inside padding (towards center), because there is already 25px padding above/below image 
+imgwidth = 107 + 110 # boy/girl + objects + padding
+imgheight = 250  # boy/girl + objects from top edge
+
+centerpadding = 0 #30
+center_imgwidth = 220 + centerpadding # objects
+center_imgheight = 110 + centerpadding # objects
+
+scene_width = 1280 # everything takes place in a central 'scene' of  1280 x 750 pixels 
+scene_height = 750 
+
+tmp = d %>%
+  separate_rows(webgazer_time,unixtlist,x,y,convert=TRUE, sep=", ")
+dd = tmp %>%
+  mutate(x_center = (system.windowW/2), 
+         y_center = (system.windowH/2),
+         
+           AOI_topleft_x_min = x_center - (scene_width/2) - wopadding,
+           AOI_topleft_x_max = x_center - (scene_width/2) + imgwidth + wipadding,
+           AOI_topleft_y_min = y_center + (scene_height/2) - imgheight - hpadding,
+           AOI_topleft_y_max = y_center + (scene_height/2),# + hpadding,
+         
+           AOI_bottomleft_x_min = x_center - (scene_width/2) - wopadding,
+           AOI_bottomleft_x_max = x_center - (scene_width/2) + imgwidth + wipadding,
+           AOI_bottomleft_y_min = y_center - (scene_height/2),# - hpadding,
+           AOI_bottomleft_y_max = y_center - (scene_height/2) + imgheight + hpadding,
+         
+           AOI_topright_x_min = x_center + (scene_width/2) - imgwidth - wipadding,
+           AOI_topright_x_max = x_center + (scene_width/2) + wopadding,
+           AOI_topright_y_min = y_center + (scene_height/2) - imgheight - hpadding,
+           AOI_topright_y_max = y_center + (scene_height/2),# + hpadding,
+         
+           AOI_bottomright_x_min = x_center + (scene_width/2) - imgwidth - wipadding,
+           AOI_bottomright_x_max = x_center + (scene_width/2) + wopadding,
+           AOI_bottomright_y_min = y_center - (scene_height/2),# - hpadding,
+           AOI_bottomright_y_max = y_center - (scene_height/2) + imgheight + hpadding,
+         
+           AOI_center_x_min = x_center - (center_imgwidth/2),
+           AOI_center_x_max = x_center + (center_imgwidth/2),
+           AOI_center_y_min = y_center - (center_imgheight/2),
+           AOI_center_y_max = y_center + (center_imgheight/2)) %>%
+  
+  mutate(look = case_when(x<AOI_topleft_x_max & x>AOI_topleft_x_min & y<AOI_topleft_y_max & y>AOI_topleft_y_min ~ "topleft",
+                          x<AOI_bottomleft_x_max & x>AOI_bottomleft_x_min & y<AOI_bottomleft_y_max & y > AOI_bottomleft_y_min ~ "bottomleft",
+                          x<AOI_topright_x_max & x>AOI_topright_x_min & y<AOI_topright_y_max & y>AOI_topright_y_min ~ "topright",
+                          x<AOI_bottomright_x_max & x>AOI_bottomright_x_min & y<AOI_bottomright_y_max & y>AOI_bottomright_y_min ~ "bottomright",
+                          x<AOI_center_x_max & x>AOI_center_x_min & y<AOI_center_y_max & y>AOI_center_y_min ~ "center",
+                         TRUE ~ "other")) %>%
+  mutate(ROI = case_when(look==target_location ~ "target",
+                         look==competitor_location ~ "competitor",
+                         look=="center" ~ "center",
+                         TRUE ~ "other")) %>%
+  mutate(target_look = ifelse(ROI == "competitor", 1, 0), competitor_look = ifelse(ROI == "target", 1, 0), center_look = ifelse(ROI == "center", 1, 0), other_look = ifelse(ROI == "other", 1, 0))  %>% # for some reason, target/competitor looks reversed and just CANNOT figure out where the error is occurring, so hacky fix here :(((
+  filter(x > -1000 & x < 2280 & y > -1000 & y < 1750) #%>%
+
+nrow(dd) # 716642 (with exclusions)
+
+# sanity check that ROIs are getting correctly assigned
+accuracies = dd %>% 
+  select(workerid,subject_information.accuracy) %>% 
+  unique() %>% 
+  mutate(x=0,y=1500)
+
+sanity = ggplot(dd,aes(x=x,y=y)) +
+  geom_point(aes(color=look), size=.5,alpha=.4) +
+  geom_text(data=accuracies,aes(label=subject_information.accuracy)) +
+  facet_wrap(~workerid)
+ggsave(sanity,file="../graphs/sanity.pdf",width=25,height=25)
+```
+
+Bin samples and align time to the onset of words.
+```{r,message=F,warning=F}
+# relevant time columns------------
+# trial_start: unix time at the beginning of the trial (when images are displayed)
+# audio_play_unix: unix time at the beginning of the audio (after 1sec display preview)
+# webgazer_time: elapsed time since webgazer started
+# unix_tlist: unix time of each webgazer_time sample
+# unix_rt: unix time of selection
+# response_time: response time in ms (trial_start - unix_rt)
+
+# remove "other" looks and unnecessary columns
+tmp = dd
+dd = tmp %>% 
+  filter(look!="other") %>% 
+  select(workerid,condition,size,list,slide_number,Name,Noun,click_onset_ms,gender_onset_ms,determiner_onset_ms,name_onset_ms,noun_onset_ms,look,target_look,competitor_look,center_look,webgazer_time,unixtlist,camview,subject_information.headphones)
+
+first_samples = dd %>% 
+  group_by(workerid,slide_number) %>% 
+  summarize(first_sample = min(webgazer_time),first_unix=min(unixtlist))
+
+# total number of samples:
+nrow(first_samples)
+
+# size of time bins to collapse over
+binsize = 100
+
+# bin samples and align to audio onset
+dd_binned = dd %>% 
+  left_join(first_samples,by=c("workerid","slide_number")) %>% 
+  mutate(first_sample = as.numeric(first_sample)) %>% 
+  mutate(relative_time = webgazer_time-first_sample) %>% 
+  mutate(time_rel_click_onset = relative_time - 1000 - click_onset_ms) %>%
+  mutate(time_rel_gender_onset = relative_time - 1000 - gender_onset_ms) %>%
+  mutate(time_rel_determiner_onset = relative_time - 1000 - determiner_onset_ms) %>%
+  mutate(time_rel_name_onset = relative_time - 1000 - name_onset_ms) %>%
+  mutate(time_rel_noun_onset = relative_time - 1000 - noun_onset_ms) %>%
+  mutate(time_bin=floor(time_rel_click_onset/binsize)) %>% 
+  mutate(time_bin_gender=floor(time_rel_gender_onset/binsize)) %>%
+  filter(time_rel_click_onset >= 0 & time_rel_click_onset < 4000) %>% # cut off any samples after maxtime (eg 5 seconds) %>%
+  mutate(binned_time_relative = time_bin*binsize)
+
+# View(dd_binned %>% arrange(workerid,slide_number)) # testing
+  
+```
+
+Plot proportions of looks to all regions (target, competitor, center) by determiner
+```{r message=F, warning=F}
+# aggregate looks (compute proportions of looks to each region in each time bin and condition; add 95% bootstrapped confidence intervals)
+agr = dd_binned %>% 
+  filter(target_look == 1 | competitor_look == 1 | center_look == 1) %>% 
+  group_by(condition,binned_time_relative) %>% 
+  summarize(target_prop=mean(target_look),target_CILow=ci.low(target_look),target_CIHigh=ci.high(target_look),competitor_prop=mean(competitor_look),competitor_CILow=ci.low(competitor_look),competitor_CIHigh=ci.high(competitor_look),center_prop=mean(center_look),center_CILow=ci.low(center_look),center_CIHigh=ci.high(center_look)) %>%  #,other_prop=mean(other_look),other_CILow=ci.low(other_look),other_CIHigh=ci.high(other_look)) %>% 
+  ungroup() %>% 
+  mutate(target_ymin=target_prop-target_CILow,target_ymax=target_prop+target_CIHigh,competitor_ymin=competitor_prop-competitor_CILow,competitor_ymax=competitor_prop+competitor_CIHigh,center_ymin=center_prop-center_CILow,center_ymax=center_prop+center_CIHigh) #,other_ymin=other_prop-other_CILow,other_ymax=other_prop+other_CIHigh)
+
+
+# prepare data for plotting
+long_props = agr %>% 
+  select(condition,binned_time_relative,target_prop,competitor_prop,center_prop) %>%  #,other_prop) %>% 
+  pivot_longer(cols = target_prop:center_prop,names_to=c("region"),values_to=c("proportion")) %>% 
+  separate(region,c("region",NA))
+
+long_ymin = agr %>%
+ select(condition,binned_time_relative,target_ymin,competitor_ymin,center_ymin) %>%  #,other_ymin) %>%
+ pivot_longer(cols = target_ymin:center_ymin,names_to=c("region"),values_to=c("ymin")) %>%
+ separate(region,c("region",NA))
+
+long_ymax = agr %>%
+ select(condition,binned_time_relative,target_ymax,competitor_ymax,center_ymax) %>%  #,other_ymax) %>%
+ pivot_longer(cols = target_ymax:center_ymax,names_to=c("region"),values_to=c("ymax")) %>%
+ separate(region,c("region",NA))
+
+toplot = long_props %>%
+ left_join(long_ymin,by=c("condition","binned_time_relative","region")) %>%
+ left_join(long_ymax,by=c("condition","binned_time_relative","region")) %>%
+ mutate(region = fct_relevel(region,"target","competitor","center"),determiner = fct_relevel(condition,"all","some"))
+```
+
+```{r fig1,  fig.height=10, fig.width=6}
+onsets = dd_binned %>% 
+  summarize(gender=mean(gender_onset_ms)-1000,determiner=mean(determiner_onset_ms)-1000,name=mean(name_onset_ms)-1000,noun=mean(noun_onset_ms)-1000)
+windows = tibble(window=c("baseline","gender","determiner","name","noun"),x=c(400,1200,2000,2700,3200))
+vlinesize=.5
+
+ggplot(toplot, aes(x=binned_time_relative,y=proportion)) +
+  geom_line(size=1, aes(color=region)) +
+  geom_ribbon(aes(ymin=ymin,ymax=ymax,fill=region),alpha=.3) +
+  scale_color_manual(values=cbPalette[2:5]) +
+  scale_fill_manual(values=cbPalette[2:5]) +
+  geom_vline(aes(xintercept=onsets$gender),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$determiner),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$name),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$noun),size=vlinesize) +
+  geom_text(data=windows,aes(label=window,x=x),y=.78,size=2) +
+  xlab("Time in ms relative to audio onset") +
+  ylab("Proportion of looks") +
+  facet_wrap(~determiner,nrow=3)
+ggsave("../graphs/prop_looks.pdf",height=3,width=8)
+```
+
+Plot proportions of looks to all regions (target, competitor, center) by determiner and size
+```{r message=F, warning=F}
+# aggregate looks (compute proportions of looks to each region in each time bin and determiner/size condition; add 95% bootstrapped confidence intervals)
+agr = dd_binned %>% 
+  filter(target_look == 1 | competitor_look == 1 | center_look == 1) %>% 
+  group_by(condition,size,binned_time_relative) %>% 
+  summarize(target_prop=mean(target_look),target_CILow=ci.low(target_look),target_CIHigh=ci.high(target_look),competitor_prop=mean(competitor_look),competitor_CILow=ci.low(competitor_look),competitor_CIHigh=ci.high(competitor_look),center_prop=mean(center_look),center_CILow=ci.low(center_look),center_CIHigh=ci.high(center_look)) %>%  #,other_prop=mean(other_look),other_CILow=ci.low(other_look),other_CIHigh=ci.high(other_look)) %>% 
+  ungroup() %>% 
+  mutate(target_ymin=target_prop-target_CILow,target_ymax=target_prop+target_CIHigh,competitor_ymin=competitor_prop-competitor_CILow,competitor_ymax=competitor_prop+competitor_CIHigh,center_ymin=center_prop-center_CILow,center_ymax=center_prop+center_CIHigh) #,other_ymin=other_prop-other_CILow,other_ymax=other_prop+other_CIHigh)
+
+# prepare data for plotting
+long_props = agr %>% 
+  select(condition,size,binned_time_relative,target_prop,competitor_prop,center_prop) %>%  #,other_prop) %>% 
+  pivot_longer(cols = target_prop:center_prop,names_to=c("region"),values_to=c("proportion")) %>% 
+  separate(region,c("region",NA))
+
+long_ymin = agr %>%
+ select(condition,size,binned_time_relative,target_ymin,competitor_ymin,center_ymin) %>%  #,other_ymin) %>%
+ pivot_longer(cols = target_ymin:center_ymin,names_to=c("region"),values_to=c("ymin")) %>%
+ separate(region,c("region",NA))
+
+long_ymax = agr %>%
+ select(condition,size,binned_time_relative,target_ymax,competitor_ymax,center_ymax) %>%  #,other_ymax) %>%
+ pivot_longer(cols = target_ymax:center_ymax,names_to=c("region"),values_to=c("ymax")) %>%
+ separate(region,c("region",NA))
+
+toplot = long_props %>%
+ left_join(long_ymin,by=c("condition","size","binned_time_relative","region")) %>%
+ left_join(long_ymax,by=c("condition","size","binned_time_relative","region")) %>%
+  mutate(region = fct_recode(region,"residue"="center")) %>% 
+  mutate(region = fct_relevel(region,"target","competitor"),determiner = fct_relevel(condition,"all","some"))
+```
+
+```{r fig2,  fig.height=3, fig.width=9}
+onsets = dd_binned %>% 
+  summarize(gender=mean(gender_onset_ms)-1000,determiner=mean(determiner_onset_ms)-1000,name=mean(name_onset_ms)-1000,noun=mean(noun_onset_ms)-1000)
+windows = tibble(window=c("baseline","gender","determiner","name","noun"),x=c(400,1200,2000,2700,3200))
+vlinesize=.5
+
+ggplot(toplot, aes(x=binned_time_relative,y=proportion)) +
+  geom_line(size=1, aes(color=determiner,linetype=size)) +
+  geom_ribbon(aes(ymin=ymin,ymax=ymax,fill=determiner,group=interaction(determiner,size)),alpha=.3) +
+  scale_fill_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
+  scale_color_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
+  geom_vline(aes(xintercept=onsets$gender),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$determiner),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$name),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$noun),size=vlinesize) +
+  geom_text(data=windows,aes(label=window,x=x),y=.95,size=2.5) +
+  xlab("Time in ms relative to audio onset") +
+  ylab("Proportion of looks to region") +  
+  ylim(0,1) +
+  scale_x_continuous(breaks=seq(0,3600,by=400),minor_breaks = seq(200,3800,by=400)) +
+  facet_wrap(~region)
+ggsave("../graphs/prop_looks_condsize.pdf",width=9,height=3)
+
+# now only target and residue
+ttoplot = toplot %>% 
+  filter(region == "target" | region == "residue") %>% 
+  droplevels()
+
+ggplot(ttoplot, aes(x=binned_time_relative,y=proportion)) +
+  geom_line(size=1, aes(color=determiner,linetype=size)) +
+  geom_ribbon(aes(ymin=ymin,ymax=ymax,fill=determiner,group=interaction(determiner,size)),alpha=.3) +
+  scale_fill_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
+  scale_color_manual(values=c(cbPalette[2],cbPalette[6],cbPalette[3])) +
+  geom_vline(aes(xintercept=onsets$gender),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$determiner),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$name),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$noun),size=vlinesize) +
+  geom_text(data=windows,aes(label=window,x=x),y=.95,size=2.5) +
+  xlab("Time in ms relative to audio onset") +
+  ylab("Proportion of looks to region") + 
+  ylim(0,1) +
+  scale_x_continuous(breaks=seq(0,3600,by=400),minor_breaks = seq(200,3200,by=400),limits=c(0,3700)) +
+  facet_wrap(~region)
+ggsave("../graphs/proportions_condsize_withresidue_tr.pdf",width=9,height=3)
+
+
+```
+
+
+Plot proportions of looks to target and competitor by determiner
+```{r message=F, warning=F}
+# aggregate looks (compute proportions of looks to each region in each time bin and condition; add 95% bootstrapped confidence intervals)
+agr = dd_binned %>% 
+  filter(target_look == 1 | competitor_look == 1) %>% 
+  group_by(condition,binned_time_relative) %>% 
+  summarize(target_prop=mean(target_look),target_CILow=ci.low(target_look),target_CIHigh=ci.high(target_look),competitor_prop=mean(competitor_look),competitor_CILow=ci.low(competitor_look),competitor_CIHigh=ci.high(competitor_look)) %>%  #,other_prop=mean(other_look),other_CILow=ci.low(other_look),other_CIHigh=ci.high(other_look)) %>% 
+  ungroup() %>% 
+  mutate(target_ymin=target_prop-target_CILow,target_ymax=target_prop+target_CIHigh,competitor_ymin=competitor_prop-competitor_CILow,competitor_ymax=competitor_prop+competitor_CIHigh) #,other_ymin=other_prop-other_CILow,other_ymax=other_prop+other_CIHigh)
+
+# prepare data for plotting
+long_props = agr %>% 
+  select(condition,binned_time_relative,target_prop,competitor_prop) %>%  #,other_prop) %>% 
+  pivot_longer(cols = target_prop:competitor_prop,names_to=c("region"),values_to=c("proportion")) %>% 
+  separate(region,c("region",NA))
+
+long_ymin = agr %>%
+ select(condition,binned_time_relative,target_ymin,competitor_ymin) %>%  #,other_ymin) %>%
+ pivot_longer(cols = target_ymin:competitor_ymin,names_to=c("region"),values_to=c("ymin")) %>%
+ separate(region,c("region",NA))
+
+long_ymax = agr %>%
+ select(condition,binned_time_relative,target_ymax,competitor_ymax) %>%  #,other_ymax) %>%
+ pivot_longer(cols = target_ymax:competitor_ymax,names_to=c("region"),values_to=c("ymax")) %>%
+ separate(region,c("region",NA))
+
+toplot = long_props %>%
+ left_join(long_ymin,by=c("condition","binned_time_relative","region")) %>%
+ left_join(long_ymax,by=c("condition","binned_time_relative","region")) %>%
+ mutate(region = fct_relevel(region,"target","competitor"),determiner = fct_relevel(condition,"all","some"))
+```
+
+```{r fig1,  fig.height=8, fig.width=6}
+onsets = dd_binned %>% 
+  summarize(gender=mean(gender_onset_ms)-1000,determiner=mean(determiner_onset_ms)-1000,name=mean(name_onset_ms)-1000,noun=mean(noun_onset_ms)-1000)
+windows = tibble(window=c("baseline","gender","determiner","name","noun"),x=c(400,1200,2000,2700,3200))
+vlinesize=.5
+
+ggplot(toplot, aes(x=binned_time_relative,y=proportion)) +
+  geom_line(size=1, aes(color=region)) +
+  geom_ribbon(aes(ymin=ymin,ymax=ymax,fill=region),alpha=.3) +
+  scale_color_manual(values=cbPalette[2:5]) +
+  scale_fill_manual(values=cbPalette[2:5]) +
+  geom_vline(aes(xintercept=onsets$gender),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$determiner),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$name),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$noun),size=vlinesize) +
+  geom_text(data=windows,aes(label=window,x=x),y=.78,size=2) +
+  xlab("Time in ms relative to target word onset") +
+  ylab("Proportion of looks") +
+  scale_x_continuous(breaks=seq(0,4000,by=400),minor_breaks = seq(200,3800,by=400)) +
+  #geom_text(data=annotations,aes(label=Label)) +
+  facet_wrap(~determiner,nrow=3)
+ggsave("../graphs/prop_looks_tc.pdf",height=8,width=6)
+```
+
+
+
+Plot proportions of looks to all regions (target, competitor, center) by determiner and size
+```{r message=F, warning=F}
+# aggregate looks (compute proportions of looks to each region in each time bin and determiner/size condition; add 95% bootstrapped confidence intervals)
+agr = dd_binned %>% 
+  group_by(condition,size,binned_time_relative) %>% 
+  summarize(target_prop=mean(target_look),target_CILow=ci.low(target_look),target_CIHigh=ci.high(target_look),competitor_prop=mean(competitor_look),competitor_CILow=ci.low(competitor_look),competitor_CIHigh=ci.high(competitor_look)) %>%  #,other_prop=mean(other_look),other_CILow=ci.low(other_look),other_CIHigh=ci.high(other_look)) %>% 
+  ungroup() %>% 
+  mutate(target_ymin=target_prop-target_CILow,target_ymax=target_prop+target_CIHigh,competitor_ymin=competitor_prop-competitor_CILow,competitor_ymax=competitor_prop+competitor_CIHigh) #,other_ymin=other_prop-other_CILow,other_ymax=other_prop+other_CIHigh)
+
+# prepare data for plotting
+long_props = agr %>% 
+  select(condition,size,binned_time_relative,target_prop,competitor_prop) %>%  #,other_prop) %>% 
+  pivot_longer(cols = target_prop:competitor_prop,names_to=c("region"),values_to=c("proportion")) %>% 
+  separate(region,c("region",NA))
+
+long_ymin = agr %>%
+ select(condition,size,binned_time_relative,target_ymin,competitor_ymin) %>%  #,other_ymin) %>%
+ pivot_longer(cols = target_ymin:competitor_ymin,names_to=c("region"),values_to=c("ymin")) %>%
+ separate(region,c("region",NA))
+
+long_ymax = agr %>%
+ select(condition,size,binned_time_relative,target_ymax,competitor_ymax) %>%  #,other_ymax) %>%
+ pivot_longer(cols = target_ymax:competitor_ymax,names_to=c("region"),values_to=c("ymax")) %>%
+ separate(region,c("region",NA))
+
+toplot = long_props %>%
+ left_join(long_ymin,by=c("condition","size","binned_time_relative","region")) %>%
+ left_join(long_ymax,by=c("condition","size","binned_time_relative","region")) %>%
+ mutate(region = fct_relevel(region,"target","competitor"),determiner = fct_relevel(condition,"all","some"))
+```
+
+```{r fig2,  fig.height=8, fig.width=6}
+onsets = dd_binned %>% 
+  summarize(gender=mean(gender_onset_ms)-1000,determiner=mean(determiner_onset_ms)-1000,name=mean(name_onset_ms)-1000,noun=mean(noun_onset_ms)-1000)
+windows = tibble(window=c("baseline","gender","determiner","name","noun"),x=c(400,1200,2000,2700,3200))
+vlinesize=.5
+
+ggplot(toplot, aes(x=binned_time_relative,y=proportion)) +
+  geom_line(size=1, aes(color=region,linetype=size)) +
+  geom_ribbon(aes(ymin=ymin,ymax=ymax,fill=region,fill=size),alpha=.3) +
+  scale_color_manual(values=cbPalette[2:5]) +
+  scale_fill_manual(values=cbPalette[2:5]) +
+  geom_vline(aes(xintercept=onsets$gender),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$determiner),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$name),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$noun),size=vlinesize) +
+  geom_text(data=windows,aes(label=window,x=x),y=.78,size=2) +
+  xlab("Time in ms relative to target word onset") +
+  ylab("Proportion of looks") +
+  scale_x_continuous(breaks=seq(0,4000,by=400),minor_breaks = seq(200,3800,by=400)) +
+  #geom_text(data=annotations,aes(label=Label)) +
+  facet_wrap(~determiner,nrow=3)
+ggsave("../graphs/prop_looks_condsize_tc.pdf",height=8,width=6)
+```
+
+
+Plot target advantage scores to target and competitor by determiner
+```{r message=F, warning=F}
+# aggregate looks (compute proportions of looks to each region in each time bin and condition; add 95% bootstrapped confidence intervals)
+dd_binned$item = as.factor(paste(dd_binned$Noun,dd_binned$Name)) # item and noun coincide
+smooth = .00000001
+agr = dd_binned %>% 
+  filter(target_look == 1 | competitor_look == 1) %>% 
+  # group_by(condition,binned_time_relative) %>% 
+  group_by(condition,workerid,binned_time_relative) %>% # it would be better to group by more variables, but it's just too noisy!
+  summarize(target_prop=mean(target_look)+smooth,competitor_prop=mean(competitor_look)+smooth) %>% 
+  ungroup() %>% 
+  # mutate(target_adv=log(competitor_prop/target_prop)) %>% # reverse this once
+  mutate(target_advantage_item=log(competitor_prop/target_prop)) %>% # reverse this once targ/comp looks fixed
+  group_by(condition,binned_time_relative) %>%
+  summarize(target_adv=mean(target_advantage_item),target_adv_CILow=ci.low(target_advantage_item),target_adv_CIHigh=ci.high(target_advantage_item)) %>%
+  ungroup() %>%
+  mutate(target_adv_ymin=target_adv-target_adv_CILow,target_adv_ymax=target_adv+target_adv_CIHigh) %>%
+  mutate(determiner = fct_relevel(condition,"all","some"))
+
+```
+
+```{r fig1,  fig.height=8, fig.width=6}
+onsets = dd_binned %>% 
+  summarize(gender=mean(gender_onset_ms)-1000,determiner=mean(determiner_onset_ms)-1000,name=mean(name_onset_ms)-1000,noun=mean(noun_onset_ms)-1000)
+windows = tibble(window=c("baseline","gender","determiner","name","noun"),x=c(400,1200,2000,2700,3200))
+vlinesize=.5
+
+ggplot(agr, aes(x=binned_time_relative,y=target_adv)) +
+  geom_line(size=1, aes(color=determiner)) +
+  geom_ribbon(aes(ymin=target_adv_ymin,ymax=target_adv_ymax,fill=determiner),alpha=.3) +
+  scale_color_manual(values=cbPalette[2:5]) +
+  scale_fill_manual(values=cbPalette[2:5]) +
+  geom_vline(aes(xintercept=onsets$gender),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$determiner),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$name),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$noun),size=vlinesize) +
+  geom_text(data=windows,aes(label=window,x=x),y=2,size=2) +
+  xlab("Time in ms relative to target word onset") +
+  ylab("Target advantage score") 
+ggsave("../graphs/prop_looks_target_adv.pdf",height=3,width=5)
+```
+
+Plot target advantage scores to target and competitor by determiner and size
+```{r message=F, warning=F}
+# aggregate looks (compute proportions of looks to each region in each time bin and condition; add 95% bootstrapped confidence intervals)
+dd_binned$item = as.factor(paste(dd_binned$Noun,dd_binned$Name)) # item and noun coincide
+smooth = .00000001
+agr = dd_binned %>% 
+  filter(target_look == 1 | competitor_look == 1) %>% 
+  group_by(condition,size,binned_time_relative) %>% 
+  # group_by(condition,workerid,binned_time_relative) %>% # it would be better to group by more variables, but it's just too noisy!
+  summarize(target_prop=mean(target_look)+smooth,competitor_prop=mean(competitor_look)+smooth) %>% 
+  ungroup() %>% 
+  mutate(target_adv=log(competitor_prop/target_prop)) %>% # reverse this once
+  # mutate(target_advantage_item=log(competitor_prop/target_prop)) %>% # reverse this once targ/comp looks fixed
+  # group_by(condition,binned_time_relative) %>% 
+  # summarize(target_adv=mean(target_advantage_item),target_adv_CILow=ci.low(target_advantage_item),target_adv_CIHigh=ci.high(target_advantage_item)) %>% 
+  # ungroup() %>% 
+  # mutate(target_adv_ymin=target_adv-target_adv_CILow,target_adv_ymax=target_adv+target_adv_CIHigh) %>% 
+  mutate(determiner = fct_relevel(condition,"all","some"))
+
+```
+
+```{r fig1,  fig.height=8, fig.width=6}
+onsets = dd_binned %>% 
+  summarize(gender=mean(gender_onset_ms)-1000,determiner=mean(determiner_onset_ms)-1000,name=mean(name_onset_ms)-1000,noun=mean(noun_onset_ms)-1000)
+windows = tibble(window=c("baseline","gender","determiner","name","noun"),x=c(400,1200,2000,2700,3200))
+vlinesize=.5
+
+ggplot(agr, aes(x=binned_time_relative,y=target_adv)) +
+  geom_line(size=1, aes(color=determiner,linetype=size)) +
+  # geom_ribbon(aes(ymin=target_adv_ymin,ymax=target_adv_ymax,fill=determiner),alpha=.3) +
+  scale_color_manual(values=cbPalette[2:5]) +
+  scale_fill_manual(values=cbPalette[2:5]) +
+  geom_vline(aes(xintercept=onsets$gender),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$determiner),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$name),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$noun),size=vlinesize) +
+  geom_text(data=windows,aes(label=window,x=x),y=2,size=2) +
+  xlab("Time in ms relative to target word onset") +
+  ylab("Target advantage score") 
+ggsave("../graphs/prop_looks_condsize_target_adv.pdf",height=3,width=5)
+```
+
+
+Plot looks separately for participants whose upper left ROI was vs wasn't blocked by camera view.
+Plot proportions of looks to all regions (target, competitor, center) by determiner
+```{r message=F, warning=F}
+# aggregate looks (compute proportions of looks to each region in each time bin and condition; add 95% bootstrapped confidence intervals)
+agr = dd_binned %>% 
+  filter(target_look == 1 | competitor_look == 1) %>% 
+  group_by(condition,camview,binned_time_relative) %>% 
+  summarize(target_prop=mean(target_look),target_CILow=ci.low(target_look),target_CIHigh=ci.high(target_look),competitor_prop=mean(competitor_look),competitor_CILow=ci.low(competitor_look),competitor_CIHigh=ci.high(competitor_look),center_prop=mean(center_look),center_CILow=ci.low(center_look),center_CIHigh=ci.high(center_look)) %>%  #,other_prop=mean(other_look),other_CILow=ci.low(other_look),other_CIHigh=ci.high(other_look)) %>% 
+  ungroup() %>% 
+  mutate(target_ymin=target_prop-target_CILow,target_ymax=target_prop+target_CIHigh,competitor_ymin=competitor_prop-competitor_CILow,competitor_ymax=competitor_prop+competitor_CIHigh) #,other_ymin=other_prop-other_CILow,other_ymax=other_prop+other_CIHigh)
+
+# prepare data for plotting
+long_props = agr %>% 
+  select(condition,camview,binned_time_relative,target_prop,competitor_prop) %>%  #,other_prop) %>% 
+  pivot_longer(cols = target_prop:competitor_prop,names_to=c("region"),values_to=c("proportion")) %>% 
+  separate(region,c("region",NA))
+
+long_ymin = agr %>%
+ select(condition,camview,binned_time_relative,target_ymin,competitor_ymin) %>%  #,other_ymin) %>%
+ pivot_longer(cols = target_ymin:competitor_ymin,names_to=c("region"),values_to=c("ymin")) %>%
+ separate(region,c("region",NA))
+
+long_ymax = agr %>%
+ select(condition,camview,binned_time_relative,target_ymax,competitor_ymax) %>%  #,other_ymax) %>%
+ pivot_longer(cols = target_ymax:competitor_ymax,names_to=c("region"),values_to=c("ymax")) %>%
+ separate(region,c("region",NA))
+
+toplot = long_props %>%
+ left_join(long_ymin,by=c("condition","binned_time_relative","region","camview")) %>%
+ left_join(long_ymax,by=c("condition","binned_time_relative","region","camview")) %>%
+ mutate(region = fct_relevel(region,"target","competitor"),determiner = fct_relevel(condition,"all","some"))
+```
+
+```{r fig1,  fig.height=8, fig.width=6}
+onsets = dd_binned %>% 
+  summarize(gender=mean(gender_onset_ms)-1000,determiner=mean(determiner_onset_ms)-1000,name=mean(name_onset_ms)-1000,noun=mean(noun_onset_ms)-1000)
+windows = tibble(window=c("baseline","gender","determiner","name","noun"),x=c(400,1200,2000,2700,3200))
+vlinesize=.5
+
+ggplot(toplot, aes(x=binned_time_relative,y=proportion)) +
+  geom_line(size=1, aes(color=region)) +
+  geom_ribbon(aes(ymin=ymin,ymax=ymax,fill=region),alpha=.3) +
+  scale_color_manual(values=cbPalette[2:5]) +
+  scale_fill_manual(values=cbPalette[2:5]) +
+  geom_vline(aes(xintercept=onsets$gender),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$determiner),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$name),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$noun),size=vlinesize) +
+  geom_text(data=windows,aes(label=window,x=x),y=.78,size=2) +
+  xlab("Time in ms relative to target word onset") +
+  ylab("Proportion of looks") +
+  #geom_text(data=annotations,aes(label=Label)) +
+  facet_grid(determiner~camview)
+ggsave("../graphs/camview_analysis/prop_looks_camview.pdf",height=8,width=7)
+```
+
+Plot proportions of looks to all regions (target, competitor, center) by determiner and size
+```{r message=F, warning=F}
+# aggregate looks (compute proportions of looks to each region in each time bin and determiner/size condition; add 95% bootstrapped confidence intervals)
+agr = dd_binned %>% 
+  filter(target_look == 1 | competitor_look == 1) %>% 
+  group_by(condition,camview,size,binned_time_relative) %>% 
+  summarize(target_prop=mean(target_look),target_CILow=ci.low(target_look),target_CIHigh=ci.high(target_look),competitor_prop=mean(competitor_look),competitor_CILow=ci.low(competitor_look),competitor_CIHigh=ci.high(competitor_look)) %>%  #,other_prop=mean(other_look),other_CILow=ci.low(other_look),other_CIHigh=ci.high(other_look)) %>% 
+  ungroup() %>% 
+  mutate(target_ymin=target_prop-target_CILow,target_ymax=target_prop+target_CIHigh,competitor_ymin=competitor_prop-competitor_CILow,competitor_ymax=competitor_prop+competitor_CIHigh) #,other_ymin=other_prop-other_CILow,other_ymax=other_prop+other_CIHigh)
+
+# prepare data for plotting
+long_props = agr %>% 
+  select(condition,size,camview,binned_time_relative,target_prop,competitor_prop) %>%  #,other_prop) %>% 
+  pivot_longer(cols = target_prop:competitor_prop,names_to=c("region"),values_to=c("proportion")) %>% 
+  separate(region,c("region",NA))
+
+long_ymin = agr %>%
+ select(condition,size,camview,binned_time_relative,target_ymin,competitor_ymin) %>%  #,other_ymin) %>%
+ pivot_longer(cols = target_ymin:competitor_ymin,names_to=c("region"),values_to=c("ymin")) %>%
+ separate(region,c("region",NA))
+
+long_ymax = agr %>%
+ select(condition,size,camview,binned_time_relative,target_ymax,competitor_ymax) %>%  #,other_ymax) %>%
+ pivot_longer(cols = target_ymax:competitor_ymax,names_to=c("region"),values_to=c("ymax")) %>%
+ separate(region,c("region",NA))
+
+toplot = long_props %>%
+ left_join(long_ymin,by=c("condition","size","binned_time_relative","region","camview")) %>%
+ left_join(long_ymax,by=c("condition","size","binned_time_relative","region","camview")) %>%
+ mutate(region = fct_relevel(region,"target","competitor"),determiner = fct_relevel(condition,"all","some"))
+```
+
+```{r fig2,  fig.height=8, fig.width=6}
+onsets = dd_binned %>% 
+  summarize(gender=mean(gender_onset_ms)-1000,determiner=mean(determiner_onset_ms)-1000,name=mean(name_onset_ms)-1000,noun=mean(noun_onset_ms)-1000)
+windows = tibble(window=c("baseline","gender","determiner","name","noun"),x=c(400,1200,2000,2700,3200))
+vlinesize=.5
+
+ggplot(toplot, aes(x=binned_time_relative,y=proportion)) +
+  geom_line(size=1, aes(color=region,linetype=size)) +
+  geom_ribbon(aes(ymin=ymin,ymax=ymax,fill=region),alpha=.3) +
+  scale_color_manual(values=cbPalette[2:5]) +
+  scale_fill_manual(values=cbPalette[2:5]) +
+  geom_vline(aes(xintercept=onsets$gender),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$determiner),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$name),size=vlinesize) +
+  geom_vline(aes(xintercept=onsets$noun),size=vlinesize) +
+  geom_text(data=windows,aes(label=window,x=x),y=.78,size=2) +
+  xlab("Time in ms relative to target word onset") +
+  ylab("Proportion of looks") +
+  #geom_text(data=annotations,aes(label=Label)) +
+  facet_grid(determiner~camview)
+ggsave("../graphs/camview_analysis/prop_looks_condsize.pdf",height=8,width=6)
+```
+
+
+
+
+
+

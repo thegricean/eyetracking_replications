@@ -32,7 +32,7 @@
                    % still generally recommended!
 \usepackage{booktabs}
                    
-%\cogscifinalcopy % Uncomment this line for the final submission 
+\cogscifinalcopy % Uncomment this line for the final submission 
 
 
 %\usepackage[none]{hyphenat} % Sometimes it can be useful to turn off
@@ -49,9 +49,9 @@
 %     urlcolor={blue!80!black}
 % }
 
-\newcommand{\tableref}[1]{Tab.~\ref{#1}}
-\newcommand{\figref}[1]{Fig.~\ref{#1}}
-\newcommand{\expref}[1]{Exp.~#1}
+\newcommand{\tableref}[1]{Table \ref{#1}}
+\newcommand{\figref}[1]{Figure \ref{#1}}
+\newcommand{\expref}[1]{Experiment #1}
 
 %\setlength\titlebox{4.5cm}
 % You can expand the titlebox if you need extra space
@@ -72,11 +72,11 @@
 \title{Seeing is believing: testing an explicit linking assumption for visual world eye-tracking in psycholinguistics} 
  
 \author{{\large \bf Judith Degen (jdegen@stanford.edu)} \\
-  Department of Linguistics, 450 Jane Stanford Way \\
-  Stanford, CA 94305 USA
+%  Department of Linguistics, 450 Jane Stanford Way \\
+%  Stanford, CA 94305 USA
   \AND {\large \bf Leyla Kursat (lkursat@stanford.edu)} \\
-  Department of Linguistics, 450 Jane Stanford Way \\
-  Stanford, CA 94305 USA
+%  Department of Linguistics, 450 Jane Stanford Way \\
+%  Stanford, CA 94305 USA
   \AND {\large \bf Daisy Leigh (ddleigh@stanford.edu)} \\
   Department of Linguistics, 450 Jane Stanford Way \\
   Stanford, CA 94305 USA}
@@ -101,6 +101,8 @@ psycholinguistics; experimental pragmatics;  scalar implicature; linking functio
 
 %\section{Linking assumptions for visual world eye-tracking}
 \section{Introduction}
+
+\jd{include some motivation for exp 2 in the intro, e.g., you are testing two alternatives (incremental prediction and on-line eyetracking) to lab-based eyetracking.}
 
 Visual world eye-tracking (VWE) is a widely used measure in psycholinguistics, fruitfully driving advances in our understanding of phonetic, lexical, syntactic, prosodic, semantic, and pragmatic processing  \cite{tanenhaus1995,Allopenna1998,altmann1999,clayards2008,SedivyEtAl1999:Achieving-Incremental-Semantic-,huang2009,kurumada2014}. %LeffelXiangKennedy2016:Imprecision-is-Pragmatic-,}
 In standard VWE tasks, participants view displays of objects and listen to spoken sentences while their eye movements are monitored (see \figref{fig:display} for an example). VWE is popular for good reason: eye movements can be interpreted as an indicator of attention that is closely time-locked to the linguistic signal. Language can guide eye movements to a region of interest in a display within 200 ms \cite{Allopenna1998}. By sampling an x/y coordinate every few milliseconds, researchers thus obtain a temporally fine-grained record of participants' language-directed attention over the course of an unfolding utterance. This property has been particularly useful in resolving questions regarding the time-course of online language processing, which typically cannot be addressed using offline measures like forced choice, truth-value judgments, or even more coarse-grained temporal measures like response times from button presses. Notable VWE findings that could not have been obtained with more coarse-grained measures include the diverse insights that visual context is rapidly integrated into syntactic structure assignment \cite{tanenhaus1995}, %,chambers2004}, 
@@ -178,7 +180,7 @@ spoons/pencils/pears/oranges}.  Participants clicked on the presumed target afte
 \begin{figure*}[h!]
 \centering
 \includegraphics[width=.9\textwidth]{../../analysis/SunBreheny/1_incremental/main/graphs/corr-window}
-\caption{Proportions of looks in SB2020 against proportions of selections in \expref{1}. Facets indicate time windows.} 
+\caption{Proportions of looks in SB2020 against proportions of selections in \expref{1}. Facets indicate time windows. In each time window, proportions were computed for each of the 216 unique combinations of item (12), determiner (3), size (2), and region (3). Distractor looks indicate sum of  looks to both distractors. Pearson's correlation coefficient for each time window is shown at the top of each corresponding facet.} 
 \label{fig:corr-window}
 \end{figure*}
 
@@ -192,7 +194,7 @@ spoons/pencils/pears/oranges}.  Participants clicked on the presumed target afte
 
 
 %SB2020 fit separate models to the baseline, gender, determiner, name, and noun windows (though only the determiner and name windows were of interest). 
-We fit separate models to the baseline, gender, determiner, and noun windows (collapsing SB2020's name window into the determiner window because the name does not add disambiguating information). The models predicted target over competitor choices from fixed effects of determiner (reference level: ``number"), centered size (higher value: ``big"), by-item and by-subject random intercepts, and random by-subject slopes for condition and size. No effects reached significance in the baseline, gender, and noun window, as expected.\footnote{In fact, fitting models to the noun window was impossible because participants, with very few exceptions, always chose the target. That is, there was no variance to speak of that a model could be estimated to explain.}  In the determiner window, the window of interest, there were main effects of condition, such that target selections were less likely in both the \emph{some} ($\beta$=-2.90, $SE$=0.36, $p<$.0001) and \emph{all} ($\beta$=-2.92, $SE$=0.36, $p<$.0001) conditions, compared to the number condition. There was no main effect of size, consistent with the visual result that target selections in the number condition are not modulated by  target set size ($\beta$=-0.09, $SE$=0.26, $p<$.73). However, we did observe interactions between determiner and size, such that small sets resulted in more target selections for \emph{some} ($\beta$=0.59, $SE$=0.28, $p<$.05) but fewer target selections for \emph{all} ($\beta$=-1.27, $SE$=0.29, $p<$.0001), compared to number terms. 
+We fit separate models to the baseline, gender, determiner, and noun windows (collapsing SB2020's name window into the determiner window because the name does not add disambiguating information). The models predicted target over competitor choices from fixed effects of determiner (reference level: ``number"), centered size (higher value: ``big"), by-item and by-subject random intercepts, and random by-subject slopes for condition and size. No effects reached significance in the baseline, gender, and noun window, as expected.\footnote{In fact, fitting models to the noun window was impossible because participants, with very few exceptions, always chose the target. That is, there was no variance to speak of that a model could be estimated to explain.}  In the determiner window, the window of interest, there were main effects of condition, such that target selections were less likely in both the \emph{some} ($\beta$=-2.90, $SE$=0.36, $p<$.0001) and \emph{all} ($\beta$=-2.92, $SE$=0.36, $p<$.0001) conditions, compared to the number condition. There was no main effect of size ($\beta$=-0.09, $SE$=0.26, $p<$.73), i.e., there was no evidence that target selections in the number condition were modulated by  target set size (see \figref{fig:results-idt}). However, we did observe interactions between determiner and size, such that small sets resulted in more target selections for \emph{some} ($\beta$=0.59, $SE$=0.28, $p<$.05) but fewer target selections for \emph{all} ($\beta$=-1.27, $SE$=0.29, $p<$.0001), compared to number terms. 
 
 %(Intercept)          3.77254    0.39655   9.513  < 2e-16 ***
 %conditionall        -2.92409    0.36359  -8.042 8.81e-16 *** 		replicates
@@ -205,8 +207,31 @@ We fit separate models to the baseline, gender, determiner, and noun windows (co
 
 \textbf{Comparison with SB2020: replication analysis}. These results constitute a near-perfect replication of  SB2020. Most of their determiner window effects replicated, with two exceptions (see overview in \tableref{tab:replication}): we did not observe a main effect of set size, and we observed an interaction of size and determiner such that small \emph{some} led to greater target selections than big \emph{some}. These differences are negligible. In our dataset, the lack of set size main effect can be explained by the interactions with determiner: while size makes no difference at all for number (the determiner predictor reference level), it has the opposite effect for \emph{all} compared to \emph{some}. A similar tendency can be observed in SB2020's results when taking into account the joint determiner and name windows. In fact,  SB2020 report the absence of a main effect for size in the name window, and instead an interaction between size and determiner. While they do not report the same post hoc analyses, visual inspection of \figref{fig:results-original} (top) suggests that the interaction in the name window is indeed the result of set size having the opposite effect for \emph{all} compared to \emph{some}. Thus, when taking into account their results from both the determiner and name window (jointly corresponding to our determiner window), the results are qualitatively identical. The different results reported by  SB2020 in the two time windows are presumably the result of certain information taking longer to be integrated, something which the incremental decision task by its offline nature cannot capture. %\jd{if time, re-analyze their results with logistic models?}
 
+\begin{table}
+\centering
+\caption{Overview of critical effects in determiner (det.) and name windows in SB2020, our \expref{1} and our \expref{2}. Rows list model predictors. ``+": significantly positive effect; ``--": significantly negative effect; ``$\cdot$": no evidence of an effect.}
+{\small
+\begin{tabular}{l l l l l l }
+\toprule
+& \multicolumn{2}{c}{SB2020} & \expref{1} & \multicolumn{2}{c}{\expref{2}}\\
+Predictor & det. & name & det. & det. & name \\
+\midrule
+all.v.num & -- &  -- &  -- & $\cdot$ & -- \\
+some.v.num & -- &  -- &  -- & -- & -- \\
+size & + &  $\cdot$ & $\cdot$ & $\cdot$ & $\cdot$ \\
+all.v.num:size & + &  + & + & + & $\cdot$ \\
+some.v.num:size & $\cdot$ &  $\cdot$ & -- & $\cdot$ & -- \\
+time & + &  ? & NA & $\cdot$ & + \\
+%all.v.num:time & -- &  ? & NA & $\cdot$ & -- \\
+%some.v.num:time & -- &  $\cdot$ & NA & $\cdot$ & $\cdot$ \\
+\bottomrule
+\end{tabular}
+}
+\label{tab:replication}
+\end{table}
 
-\textbf{Comparison with SB2020: linking function analysis}. \figref{fig:corr-window} shows the correlation between  proportion of selections in \expref{1} and proportions of looks in SB2020. The overall correlation was very high ($r(862) = .87$, $p < .0001$), suggesting preliminary support for the Referential Belief link. To investigate whether the predictive power of explicit beliefs was modulated by additional factors, we conducted a linear regression  %\footnote{\jd{Beta regression is the appropriate analysis here because prooprtions are bounded by [0,1]. For simplicity, linear regression. If time, also do Beta regression and report whether results similar.}} 
+
+\textbf{Comparison with SB2020: linking function analysis}. \figref{fig:corr-window} shows the correlation between  proportion of selections in \expref{1} and proportions of looks in SB2020, computed at the level of unique combinations of item, determiner, and size. The correlation was very high ($r(862) = .87$, $p < .0001$), suggesting preliminary support for the Referential Belief link. To investigate whether the predictive power of explicit beliefs was modulated by additional factors, we conducted a linear regression  %\footnote{\jd{Beta regression is the appropriate analysis here because prooprtions are bounded by [0,1]. For simplicity, linear regression. If time, also do Beta regression and report whether results similar.}} 
 predicting proportion of looks from fixed effects of proportion of selections (mean-centered) and its 2-way interactions with time window (dummy-coded, reference level: `determiner') and region of interest (dummy-coded, reference level: `target'). There was a large and significant effect of selection proportion  ($\beta$=0.79, $SE$=0.02, $t$=32.31, $p<$.0001), such that stronger beliefs resulted in more looks. This effect was modulated by time window: compared to the determiner window, selection proportion was a worse predictor of looks in the baseline window   ($\beta$=-0.11, $SE$=0.05, $t$=-2.25, $p<$.05), a better predictor in the noun window   ($\beta$=0.13, $SE$=0.03, $t$=5.18, $p<$.0001), and no different in the gender window    ($\beta$=-0.02, $SE$=0.04, $t$=-0.61, $p<$.55). The effect was also modulated by the region of interest: selection proportion was a worse predictor of competitor looks ($\beta$=-0.46, $SE$=0.03, $t$=-13.16, $p<$.0001) and distractor looks  ($\beta$=-0.33, $SE$=0.03, $t$=-9.89, $p<$.0001) than of target looks. %(see \figref{fig:corr-region}).
 
 
@@ -241,7 +266,7 @@ We next investigate whether SB2020's and the \expref{1} results  also replicate 
 
 \subsection{Results}
 
-\figref{fig:results-original} (bottom) shows proportions of target looks in each condition (computed out of target, competitor, and residue looks in 100ms time bins). The results display striking dissimilarities to SB2020: in particular, all curves are flatter, i.e., looks to the target increase more slowly than in the original study. 
+\figref{fig:results-original} (bottom) shows proportions of target looks in each condition (computed out of target, competitor, and residue looks in 100ms time bins). The results display striking dissimilarities to SB2020: in particular, all curves are flatter, i.e., looks to the target increase more slowly than in the original study. \jd{rephrase, highlight the visual impressionn of differeence but that it just means that things are delayed}
 
 We conducted separate mixed-effects logistic regressions in the 2 time windows of interest (determiner, name), predicting target over competitor looks from fixed effects of time (scaled and centered), determiner (reference level: `number'), centered size (higher value: `big'), and their interactions. The random effects structure included by-item and by-participant random intercepts and slopes for all  fixed effects.
 
@@ -264,27 +289,7 @@ In the name window, there was again a significant (and larger) intercept effect 
 %conditionnum.v.all:csize:ctime   0.03438    0.10368   0.332 0.740194    
 %conditionnum.v.some:csize:ctime  0.06331    0.10425   0.607 0.543648   
 
-\begin{table}
-\caption{Overview of critical effects in determiner (det.) and name windows in SB2020, our \expref{1} and our \expref{2}. Rows list model predictors. ``+": significantly positive effect; ``--": significantly negative effect; ``$\cdot$": no evidence of an effect.}
-{\small
-\begin{tabular}{l l l l l l }
-\toprule
-& \multicolumn{2}{c}{SB2020} & \expref{1} & \multicolumn{2}{c}{\expref{2}}\\
-Predictor & det. & name & det. & det. & name \\
-\midrule
-all.v.num & -- &  -- &  -- & $\cdot$ & -- \\
-some.v.num & -- &  -- &  -- & -- & -- \\
-size & + &  $\cdot$ & $\cdot$ & $\cdot$ & $\cdot$ \\
-all.v.num:size & + &  + & + & + & $\cdot$ \\
-some.v.num:size & $\cdot$ &  $\cdot$ & -- & $\cdot$ & -- \\
-time & + &  ? & NA & $\cdot$ & + \\
-%all.v.num:time & -- &  ? & NA & $\cdot$ & -- \\
-%some.v.num:time & -- &  $\cdot$ & NA & $\cdot$ & $\cdot$ \\
-\bottomrule
-\end{tabular}
-}
-\label{tab:replication}
-\end{table}
+
 
 \textbf{Comparison with SB2020: replication analysis}. An overview of the effects reported by SB2020 and the effects observed in our Exps.~1 and 2 is shown in \tableref{tab:replication}. Most of the effects reported by SB2020 as first emerging in the determiner window did not emerge until the name window (about 700ms later). Of these, however, most replicated.
 
@@ -292,7 +297,7 @@ time & + &  ? & NA & $\cdot$ & + \\
 
 The contributions of this work are three-fold: first, we twice---once in an incremental decision task and once in a novel web-based eye-tracking paradigm---replicated  \citeA{sun2020}'s result that there is more uncertainty regarding the intended target for the determiners \emph{all} and \emph{some} than for numbers; and that this uncertainty is modulated by set size such that \emph{all} is associated with larger sets (3 objects) and \emph{some}, if anything, with smaller ones (2 objects). 
 
-Second,  in  contrast to a previous re-analysis of an experimental pragmatics eye-tracking dataset \cite{QingLD2018}, the current re-analysis offers clear support for the Referential Belief link.  We believe this difference is most likely the result of participants's greater expectations for the observed instructions in SB2020's study, though this requires further investigation. %Further support for this explanation comes from \citeA{kreiss2020}, who found that the size of contrastive inferences is robustly predicted by empirically elicited production expectations.  (see preliminary production results from Qing et al, but also Kreiss and Degen 2020 results, plus tons of other literature supporting tight link between production and comprehension in general, and importance of clearly nameable items (ie, clear production expectations) for VW eye-tracking in particular (go back to mike's papers from the oughts) 
+Second,  in  contrast to a previous re-analysis of an experimental pragmatics eye-tracking dataset \cite{QingLD2018}, the current re-analysis of \citeA{sun2020}'s data offers clear support for the Referential Belief link.  We believe this difference is most likely the result of participants's greater expectations for the observed instructions in SB2020's study, though this requires further investigation. %Further support for this explanation comes from \citeA{kreiss2020}, who found that the size of contrastive inferences is robustly predicted by empirically elicited production expectations.  (see preliminary production results from Qing et al, but also Kreiss and Degen 2020 results, plus tons of other literature supporting tight link between production and comprehension in general, and importance of clearly nameable items (ie, clear production expectations) for VW eye-tracking in particular (go back to mike's papers from the oughts) 
 The Referential Belief link does not capture that participants' looks to regions in a display are not just guided by their belief that a region contains the target, but can be subject to other attentional processes \cite{Allopenna1998}. A fuller linking theory must integrate such processes.
 
 
