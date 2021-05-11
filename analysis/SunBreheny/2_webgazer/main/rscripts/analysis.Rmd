@@ -151,8 +151,8 @@ hpadding = 20
 imgwidth = 107 + 110 + wpadding # boy/girl + objects
 imgheight = 200 + hpadding # boy/girl (taller than objects)
 
-center_imgwidth = 220 + padding # objects
-center_imgheight = 110 + padding # objects
+center_imgwidth = 220 + wpadding # objects
+center_imgheight = 110 + hpadding # objects
 
 scene_width = 1280 # everything takes place in a central 'scene' of  1280 x 750 pixels 
 scene_height = 750 

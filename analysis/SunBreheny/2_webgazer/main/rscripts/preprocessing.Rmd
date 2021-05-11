@@ -267,9 +267,14 @@ dd = tmp %>%
   filter(look!="other") %>% 
   select(workerid,condition,size,determiner,list,slide_number,Name,Noun,click_onset_ms,gender_onset_ms,determiner_onset_ms,name_onset_ms,noun_onset_ms,look,target_look,competitor_look,center_look,webgazer_time,unixtlist,camview,click_onset_ms_200shift,gender_onset_ms_200shift,determiner_onset_ms_200shift,name_onset_ms_200shift,noun_onset_ms_200shift)
 
+# strip any remaining brackets
+dd$unixtlist = gsub("\\[","",dd$unixtlist)
+
 first_samples = dd %>% 
   group_by(workerid,slide_number) %>% 
   summarize(first_sample = min(webgazer_time),first_unix=min(unixtlist))
+#first_samples$first_unix = as.numeric(gsub("\\[","",first_samples$first_unix))
+
 
 # total number of samples:
 nrow(first_samples)
@@ -277,10 +282,11 @@ nrow(first_samples)
 # size of time bins to collapse over
 binsize = 100
 
+
 # bin samples and align to audio onset
 dd_binned = dd %>% 
   left_join(first_samples,by=c("workerid","slide_number")) %>% 
-  mutate(first_sample = as.numeric(first_sample)) %>% 
+  mutate(first_sample = as.numeric(first_sample), first_unix = as.numeric(first_unix), unixtlist = as.numeric(unixtlist)) %>% 
   mutate(relative_time = webgazer_time-first_sample) %>% 
   mutate(relative_time_unix = unixtlist-first_unix) %>%
   mutate(time_rel_click_onset = relative_time - 1000 - click_onset_ms) %>% 
@@ -466,7 +472,7 @@ ggsave("../graphs/proportions_condsize_withresidue_target.pdf",width=5,height=3)
 # create windows and align to audio onset + 200
 dd_model = dd %>% 
   left_join(first_samples,by=c("workerid","slide_number")) %>% 
-  mutate(first_sample = as.numeric(first_sample)) %>% 
+  mutate(first_sample = as.numeric(first_sample), first_unix = as.numeric(first_unix), unixtlist = as.numeric(unixtlist)) %>% 
   mutate(relative_time = webgazer_time-first_sample) %>% 
   mutate(relative_time_unix = unixtlist-first_unix) %>%
   mutate(time_rel_click_onset = relative_time - 1000 - click_onset_ms_200shift) %>% 
